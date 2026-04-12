@@ -59,8 +59,8 @@
             flex: 1;
             border-bottom: 1px solid rgba(255,255,255,0.4);
         }
-        .or-separator:not(:empty)::before { margin-right: 1rem; }
-        .or-separator:not(:empty)::after { margin-left: 1rem; }
+        .or-separator:not(:empty)::before { margin-right: 1rem; content: "-----------"; }
+        .or-separator:not(:empty)::after { margin-left: 1rem; content: "-----------"; }
 
         input {
             width: 100%; padding: 14px; margin: 8px 0; background: var(--input-bg);
@@ -248,14 +248,14 @@
             onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // REPLACE THIS WITH YOUR CONFIG FROM FIREBASE CONSOLE
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyDo51L0SkPnJYHX7cmbAUHiZSE-IDmcrW0",
+            authDomain: "cosmic--hub.firebaseapp.com",
+            projectId: "cosmic--hub",
+            storageBucket: "cosmic--hub.firebasestorage.app",
+            messagingSenderId: "233637061281",
+            appId: "1:233637061281:web:01da50ef16473fb62586e0",
+            measurementId: "G-JNGFCP48LJ"
         };
 
         const app = initializeApp(firebaseConfig);
