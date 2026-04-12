@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Access</title>
+    <title>Cosmic Access - Refined</title>
     <style>
         :root {
             --primary: #a29bfe;
@@ -11,179 +11,114 @@
             --glass: rgba(255, 255, 255, 0.08);
             --text: #ffffff;
             --input-bg: rgba(0, 0, 0, 0.3);
+            --modal-bg: rgba(10, 10, 25, 0.98);
+            --error: #ff7675;
+            --success: #00b894;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
 
         body, html {
-            height: 100%;
-            overflow: hidden;
+            height: 100%; overflow: hidden;
             background: linear-gradient(-45deg, #020111, #050531, #191970, #000000);
-            background-size: 400% 400%;
-            animation: gradientBG 20s ease infinite;
+            background-size: 400% 400%; animation: gradientBG 20s ease infinite;
             color: var(--text);
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        #loader {
-            position: fixed; inset: 0; background: #020111;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999; transition: opacity 0.8s ease;
-        }
-
-        .spinner {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid var(--primary);
-            border-radius: 50%; animation: spin 0.8s linear infinite;
-        }
-
+        #loader { position: fixed; inset: 0; background: #020111; display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.8s ease; }
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
         #canvas { position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
 
-        .container {
-            position: relative; z-index: 10;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; perspective: 1500px; padding: 20px;
-        }
+        .container { position: relative; z-index: 10; display: flex; justify-content: center; align-items: center; height: 100vh; perspective: 1500px; transition: filter 0.5s ease; }
+        .container.blurred { filter: blur(20px); pointer-events: none; }
 
-        /* --- Dynamic Card Heights --- */
-        .card {
-            position: relative;
-            width: 360px;
-            height: 460px; 
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s ease;
-            transform-style: preserve-3d;
-        }
-
-        .card.flipped {
-            transform: rotateY(180deg);
-            height: 600px; 
-        }
-
-        .face {
-            position: absolute; inset: 0; backface-visibility: hidden;
-            background: var(--glass); backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
-            display: flex; flex-direction: column;
-            overflow: hidden;
-        }
-
+        .card { position: relative; width: 360px; height: 460px; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s ease; transform-style: preserve-3d; }
+        .card.flipped { transform: rotateY(180deg); height: 600px; }
+        .face { position: absolute; inset: 0; backface-visibility: hidden; background: var(--glass); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); display: flex; flex-direction: column; overflow: hidden; }
         .card-back { transform: rotateY(180deg); }
+        .scroll-wrapper { flex: 1; overflow-y: auto; padding: 2.5rem 2rem; display: flex; flex-direction: column; justify-content: center; scrollbar-width: none; }
+        
+        h2, h3 { font-weight: 500; letter-spacing: 1px; text-align: center; }
+        .divider { height: 1px; width: 100%; background: rgba(255,255,255,0.2); margin: 1.2rem 0; }
 
-        .scroll-wrapper {
-            flex: 1;
-            overflow-y: auto;
-            padding: 2.5rem 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            scrollbar-width: none;
-        }
-        .scroll-wrapper::-webkit-scrollbar { display: none; }
-
-        h2 { font-size: 1.8rem; margin-bottom: 0.2rem; text-align: center; font-weight: 500; letter-spacing: 1px; }
-
-        .divider { height: 1px; width: 100%; background: rgba(255,255,255,0.25); margin: 1.2rem 0; flex-shrink: 0; }
-
-        .or-divider {
-            display: flex; align-items: center; color: rgba(255,255,255,0.4);
-            font-size: 0.8rem; margin: 1.5rem 0; text-transform: uppercase; flex-shrink: 0;
-        }
-        .or-divider::before, .or-divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.15); }
-        .or-divider::before { margin-right: 1rem; }
-        .or-divider::after { margin-left: 1rem; }
-
-        input {
-            width: 100%; padding: 14px; margin: 6px 0;
-            background: var(--input-bg); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px; color: white; font-size: 1rem; outline: none; transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(162, 155, 254, 0.5); }
-
-        button.main-btn {
-            width: 100%; padding: 14px; margin-top: 1rem; border: none; border-radius: 10px;
-            background: var(--accent); color: white; font-weight: bold; font-size: 1rem;
-            cursor: pointer; transition: all 0.3s ease; flex-shrink: 0;
-        }
-        button.main-btn:hover { background: var(--primary); transform: translateY(-2px); }
-
-        /* --- Connecting Engine Styles --- */
-        .google-container {
-            position: relative;
-            height: 48px;
-            width: 100%;
-            flex-shrink: 0;
-        }
-
-        .loading-text {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            line-height: 48px;
-            font-size: 0.85rem;
-            color: var(--primary);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-
-        .google-btn {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.95);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
+        .or-separator {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-weight: 600;
-            color: #333;
-            cursor: pointer;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease, transform 0.2s ease;
+            text-align: center;
+            margin: 1.5rem 0;
+            font-size: 0.8rem;
+            opacity: 0.4;
+            color: var(--text);
+            flex-shrink: 0;
         }
-
-        .google-btn.visible {
-            opacity: 1;
-            pointer-events: auto;
+        .or-separator::before, .or-separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255,255,255,0.4);
         }
+        .or-separator:not(:empty)::before { margin-right: 1rem; }
+        .or-separator:not(:empty)::after { margin-left: 1rem; }
 
-        .google-btn:hover {
-            background: #ffffff;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        input {
+            width: 100%; padding: 14px; margin: 8px 0; background: var(--input-bg);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white;
+            outline: none; transition: 0.3s; flex-shrink: 0;
         }
+        input:focus { border-color: var(--primary); }
+        input.invalid { border-color: var(--error) !important; box-shadow: 0 0 10px rgba(255, 118, 117, 0.3); }
+        input:disabled { opacity: 0.6; cursor: not-allowed; background: rgba(255,255,255,0.05); }
 
-        .google-icon { width: 18px; height: 18px; }
+        .label-text { font-size: 0.85rem; color: var(--primary); align-self: flex-start; margin-left: 5px; font-weight: 600; }
+        .small-link { font-size: 0.75rem; color: rgba(255,255,255,0.4); cursor: pointer; text-decoration: underline; margin-top: -5px; margin-bottom: 10px; transition: 0.2s; border: none; background: none; outline: none; flex-shrink: 0;}
+        .small-link:hover { color: var(--primary); }
 
-        .text-btn {
-            background: none; border: none; color: rgba(255,255,255,0.6);
-            font-size: 0.9rem; margin-top: 1.5rem; cursor: pointer;
-            text-decoration: underline; flex-shrink: 0; align-self: center;
+        .google-btn-wrapper { position: relative; width: 100%; height: 48px; margin-top: 10px; flex-shrink: 0; }
+        .connecting-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: var(--primary); font-weight: 600; animation: pulse 1.5s infinite; pointer-events: none; }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.9; } }
+
+        .google-btn { 
+            position: absolute; inset: 0; width: 100%; height: 100%; background: white; color: #333; 
+            border-radius: 10px; border: none; font-weight: 600; display: flex; 
+            align-items: center; justify-content: center; gap: 10px; cursor: pointer; 
+            opacity: 0; transform: scale(0.95); pointer-events: none; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-shrink: 0;
         }
+        .google-btn.visible { opacity: 1; transform: scale(1); pointer-events: auto; }
 
-        @media (max-height: 500px) {
-            .container { align-items: flex-start; overflow-y: auto; }
-            .card { margin: 20px 0; }
+        .btn-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-shrink: 0;}
+        button.main-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; background: var(--accent); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; flex-shrink: 0; }
+        button.main-btn:hover:not(:disabled) { background: var(--primary); transform: translateY(-2px); }
+        button.main-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        #modalOverlay { position: fixed; inset: 0; z-index: 100; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+        .modal { width: 400px; background: var(--modal-bg); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); padding: 2.5rem; position: relative; }
+        
+        .close-modal {
+            position: absolute; top: 20px; right: 20px; width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.05); border-radius: 50%;
+            cursor: pointer; transition: 0.3s; z-index: 110; border: 1px solid rgba(255,255,255,0.1);
         }
+        .close-modal:hover { background: var(--error); transform: rotate(90deg); }
+        .close-modal svg { width: 14px; height: 14px; fill: white; }
+
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .err-hint { color: var(--error); font-size: 0.75rem; display: none; margin-top: -4px; margin-bottom: 8px; font-weight: 500; flex-shrink: 0; }
+        .req-list { list-style: none; margin-bottom: 10px; }
+        .req-list li { font-size: 0.7rem; color: rgba(255,255,255,0.4); transition: 0.3s; }
+        .req-list li.fail { color: var(--error); }
+        .req-list li.pass { color: var(--success); }
+
+        .otp-group { display: flex; justify-content: space-between; gap: 5px; margin: 1.2rem 0; }
+        .otp-i { width: 45px; height: 50px; text-align: center; font-size: 1.2rem; background: var(--input-bg); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; }
+        .spam-text { display: block; font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-bottom: 1rem; text-align: center; }
+        #resendText { display: block; text-align: center; font-size: 0.8rem; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
@@ -191,167 +126,332 @@
     <div id="loader"><div class="spinner"></div></div>
     <canvas id="canvas"></canvas>
 
-    <div class="container">
+    <div class="container" id="uiWrapper">
         <div class="card" id="mainCard">
-            
             <div class="face card-front">
                 <div class="scroll-wrapper">
                     <h2>LOGIN</h2>
                     <div class="divider"></div>
-                    <input type="text" placeholder="Username or Email">
-                    <input type="password" placeholder="Password">
-                    <button class="main-btn">LOGIN</button>
+                    <input type="email" id="loginUser" placeholder="Email">
+                    <input type="password" id="loginPass" placeholder="Password">
+                    <p id="loginErr" class="err-hint" style="text-align: center;"></p>
+                    <button class="main-btn" id="loginBtnAction">LOGIN</button>
                     
-                    <div class="or-divider">OR</div>
-                    
-                    <div class="google-container">
-                        <div class="loading-text">Connecting...</div>
-                        <button class="google-btn">
-                            <svg class="google-icon" viewBox="0 0 24 24">
-                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                            </svg>
+                    <div class="or-separator">OR</div>
+
+                    <div class="google-btn-wrapper">
+                        <div class="connecting-text">Connecting...</div>
+                        <button class="google-btn googleAuthBtn">
+                            <svg style="width:18px" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                             Continue with Google
                         </button>
                     </div>
-
-                    <button class="text-btn" onclick="toggleFlip()">Don't have an account? Sign Up</button>
+                    <button class="small-link" style="margin-top: 20px; text-align: center; display: block; width: 100%;" onclick="toggleFlip()">Don't have an account? Sign Up</button>
                 </div>
             </div>
-
             <div class="face card-back">
                 <div class="scroll-wrapper">
                     <h2>SIGN UP</h2>
                     <div class="divider"></div>
-                    <input type="email" placeholder="Email">
-                    <input type="text" placeholder="Username">
-                    <input type="password" placeholder="Password">
-                    <input type="password" placeholder="Repeat Password">
-                    <button class="main-btn">SIGN UP</button>
+                    <input type="email" id="rawEmail" placeholder="Email">
+                    <input type="text" id="rawUser" placeholder="Username">
+                    <input type="password" id="rawPass" placeholder="Password">
+                    <button class="main-btn" onclick="openCreateAccount(document.getElementById('rawEmail').value)">SIGN UP</button>
+                    
+                    <div class="or-separator">OR</div>
 
-                    <div class="or-divider">OR</div>
-
-                    <div class="google-container">
-                        <div class="loading-text">Connecting...</div>
-                        <button class="google-btn">
-                            <svg class="google-icon" viewBox="0 0 24 24">
-                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                            </svg>
+                    <div class="google-btn-wrapper">
+                        <div class="connecting-text">Connecting...</div>
+                        <button class="google-btn googleAuthBtn">
+                            <svg style="width:18px" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                             Continue with Google
                         </button>
                     </div>
-
-                    <button class="text-btn" onclick="toggleFlip()">Already have an account? Login</button>
+                    <button class="small-link" style="margin-top: 20px; text-align: center; display: block; width: 100%;" onclick="toggleFlip()">Already have an account? Login</button>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <script>
+    <div id="modalOverlay">
+        <div class="modal">
+            <div class="close-modal" onclick="closeModal()">
+                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </div>
+            <h3>Create Account</h3>
+            <div class="divider"></div>
+            <div id="modalLoader" class="spinner" style="width: 30px; height: 30px; margin: 20px auto; display: none;"></div>
+            
+            <div id="modalBody">
+                <div class="step-content active" id="step1">
+                    <span class="label-text">Email:</span>
+                    <input type="email" id="signupEmail" value="" disabled>
+                    <button class="small-link" onclick="unlockEmail()">Not the correct email? Change Email</button>
+                </div>
+
+                <div class="step-content" id="step2">
+                    <span class="label-text">Choose Username:</span>
+                    <input type="text" id="signupUser" placeholder="Username" maxlength="16">
+                    <p id="userTakenErr" class="err-hint">Username taken</p>
+                    <p id="userShortErr" class="err-hint">Username too short (min 4)</p>
+                </div>
+
+                <div class="step-content" id="step3">
+                    <span class="label-text">Create Password:</span>
+                    <input type="password" id="signupPass" placeholder="••••••••">
+                    <ul class="req-list">
+                        <li id="req-len">• Minimum 8 characters</li>
+                        <li id="req-cap">• At least one capital letter</li>
+                        <li id="req-spec">• At least one special character</li>
+                    </ul>
+                </div>
+
+                <div class="step-content" id="step4">
+                    <span class="label-text">Repeat Password:</span>
+                    <input type="password" id="signupRepeat" placeholder="••••••••">
+                    <p id="repeatErr" class="err-hint">Passwords do not match</p>
+                </div>
+
+                <div class="step-content" id="step5">
+                    <p style="text-align: center; font-size: 0.9rem;">Verification</p>
+                    <p style="text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-bottom: 5px;">Sent to <strong id="displayEmail"></strong></p>
+                    <div class="otp-group">
+                        <input type="tel" class="otp-i" maxlength="1" inputmode="numeric">
+                        <input type="tel" class="otp-i" maxlength="1" inputmode="numeric">
+                        <input type="tel" class="otp-i" maxlength="1" inputmode="numeric">
+                        <input type="tel" class="otp-i" maxlength="1" inputmode="numeric">
+                        <input type="tel" class="otp-i" maxlength="1" inputmode="numeric">
+                        <input type="tel" class="otp-i" maxlength="1" inputmode="numeric">
+                    </div>
+                    <p id="otpErr" class="err-hint" style="text-align:center; display:none;">Link not yet clicked</p>
+                    <small class="spam-text">We've sent a verification link to your email. Click it to continue.</small>
+                    <span id="resendText" class="small-link" style="text-decoration: none; opacity: 0.5;">Resend link in <span id="timer">30</span>s</span>
+                </div>
+
+                <div class="btn-row">
+                    <button class="main-btn" id="backBtn" onclick="prevStep()" disabled style="background: rgba(255,255,255,0.1);">Back</button>
+                    <button class="main-btn" id="nextBtn" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            GoogleAuthProvider, 
+            signInWithPopup,
+            sendEmailVerification,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // REPLACE THIS WITH YOUR CONFIG FROM FIREBASE CONSOLE
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        let currentStep = 1;
+        let timerVal = 30;
+        let countdown;
+
         window.addEventListener('load', () => {
             setTimeout(() => {
-                document.getElementById('loader').style.opacity = '0';
-                setTimeout(() => document.getElementById('loader').style.display = 'none', 600);
-            }, 1200);
-            triggerGoogleConnection();
+                const loader = document.getElementById('loader');
+                if(loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 600);
+                }
+            }, 1000);
+            triggerGoogleReveal();
         });
 
-        function toggleFlip() {
-            document.getElementById('mainCard').classList.toggle('flipped');
-            triggerGoogleConnection();
-        }
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.emailVerified) {
+                window.location.href = "https://mrloudkeyboard.github.io/dashboard";
+            }
+        });
 
-        // --- Simulated Google Connection Engine ---
-        function triggerGoogleConnection() {
-            const btns = document.querySelectorAll('.google-btn');
-            btns.forEach(btn => btn.classList.remove('visible'));
+        document.getElementById('loginBtnAction').addEventListener('click', async () => {
+            const email = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginPass').value;
+            const errEl = document.getElementById('loginErr');
             
-            setTimeout(() => {
-                btns.forEach(btn => btn.classList.add('visible'));
-            }, 1800); 
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                if(userCredential.user.emailVerified) {
+                    window.location.href = "https://mrloudkeyboard.github.io/dashboard";
+                } else {
+                    errEl.innerText = "Please verify your email first.";
+                    errEl.style.display = 'block';
+                }
+            } catch (error) {
+                errEl.innerText = "Invalid credentials";
+                errEl.style.display = 'block';
+            }
+        });
+
+        document.querySelectorAll('.googleAuthBtn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                try {
+                    await signInWithPopup(auth, provider);
+                    window.location.href = "https://mrloudkeyboard.github.io/dashboard";
+                } catch (error) {
+                    console.error(error);
+                }
+            });
+        });
+
+        window.openCreateAccount = (email) => {
+            const finalEmail = email || "";
+            document.getElementById('signupEmail').value = finalEmail;
+            document.getElementById('displayEmail').innerText = finalEmail;
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('uiWrapper').classList.add('blurred');
+            currentStep = 1;
+            setStep(1);
+        };
+
+        window.nextStep = async () => {
+            if (!validateCurrentStep()) return;
+            
+            if (currentStep === 4) {
+                const email = document.getElementById('signupEmail').value;
+                const pass = document.getElementById('signupPass').value;
+                
+                showStepLoading(async () => {
+                    try {
+                        const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+                        await sendEmailVerification(userCred.user);
+                        currentStep++;
+                        setStep(currentStep);
+                        startCountdown();
+                    } catch (error) {
+                        alert(error.message);
+                        closeModal();
+                    }
+                });
+                return;
+            }
+
+            if (currentStep === 5) {
+                auth.currentUser.reload().then(() => {
+                    if(auth.currentUser.emailVerified) {
+                        window.location.href = "https://mrloudkeyboard.github.io/dashboard";
+                    } else {
+                        document.getElementById('otpErr').style.display = 'block';
+                    }
+                });
+                return;
+            }
+            
+            showStepLoading(() => { 
+                currentStep++; 
+                setStep(currentStep); 
+            });
+        };
+
+        window.toggleFlip = () => { 
+            document.getElementById('mainCard').classList.toggle('flipped'); 
+            triggerGoogleReveal();
+        };
+
+        function triggerGoogleReveal() {
+            const btns = document.querySelectorAll('.google-btn');
+            btns.forEach(b => b.classList.remove('visible'));
+            setTimeout(() => btns.forEach(b => b.classList.add('visible')), 1500);
         }
 
-        // --- Starfield Logic ---
+        window.closeModal = () => {
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('uiWrapper').classList.remove('blurred');
+            clearInterval(countdown);
+        };
+
+        window.unlockEmail = () => {
+            const e = document.getElementById('signupEmail');
+            e.disabled = false; e.focus();
+        };
+
+        function setStep(step) {
+            document.querySelectorAll('.step-content').forEach((el, i) => el.classList.toggle('active', (i + 1) === step));
+            document.getElementById('backBtn').disabled = (step === 1 || step === 5);
+            document.getElementById('nextBtn').innerText = (step === 5) ? "I've Verified" : "Next";
+        }
+
+        window.prevStep = () => {
+            if(currentStep > 1) showStepLoading(() => { currentStep--; setStep(currentStep); });
+        };
+
+        function showStepLoading(callback) {
+            const body = document.getElementById('modalBody');
+            const loader = document.getElementById('modalLoader');
+            body.style.display = 'none'; loader.style.display = 'block';
+            setTimeout(() => { loader.style.display = 'none'; body.style.display = 'block'; callback(); }, 400);
+        }
+
+        function validateCurrentStep() {
+            if (currentStep === 2) {
+                const val = document.getElementById('signupUser').value;
+                return val.length >= 4;
+            }
+            if (currentStep === 3) {
+                const val = document.getElementById('signupPass').value;
+                const hasCap = /[A-Z]/.test(val);
+                const hasSpec = /[!@#$%^&*]/.test(val);
+                const hasLen = val.length >= 8;
+                document.getElementById('req-len').className = hasLen ? 'pass' : 'fail';
+                document.getElementById('req-cap').className = hasCap ? 'pass' : 'fail';
+                document.getElementById('req-spec').className = hasSpec ? 'pass' : 'fail';
+                return hasCap && hasSpec && hasLen;
+            }
+            if (currentStep === 4) {
+                const match = document.getElementById('signupRepeat').value === document.getElementById('signupPass').value;
+                document.getElementById('repeatErr').style.display = match ? 'none' : 'block';
+                return match;
+            }
+            return true;
+        }
+
+        function startCountdown() {
+            timerVal = 30;
+            const resend = document.getElementById('resendText');
+            resend.style.opacity = "0.5"; resend.style.cursor = "default";
+            clearInterval(countdown);
+            countdown = setInterval(() => {
+                timerVal--;
+                resend.innerHTML = `Resend link in <span id="timer">${timerVal}</span>s`;
+                if(timerVal <= 0) {
+                    clearInterval(countdown);
+                    resend.innerText = "Resend link";
+                    resend.style.opacity = "1"; resend.style.cursor = "pointer";
+                    resend.onclick = () => { sendEmailVerification(auth.currentUser); startCountdown(); };
+                }
+            }, 1000);
+        }
+
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let stars = [];
-        const mouse = { x: -2000, y: -2000, active: false, timer: null };
-
         class Star {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.originX = this.x; 
-                this.size = Math.random() * 1.8;
-                this.speed = Math.random() * 0.5 + 0.1;
-                this.opacity = Math.random();
-            }
-            update() {
-                this.y += this.speed;
-                if (this.y > canvas.height) {
-                    this.y = -10; 
-                    this.x = Math.random() * canvas.width;
-                    this.originX = this.x;
-                }
-
-                // Reaction only occurs if mouse is actively moving
-                if (mouse.active) {
-                    let dx = mouse.x - this.x;
-                    let dy = mouse.y - this.y;
-                    let dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < 100) {
-                        let force = (100 - dist) / 100;
-                        // Gentler sensitivity (force * 5 instead of force * 18)
-                        this.x -= (dx / dist) * force * 5;
-                        this.y -= (dy / dist) * force * 5;
-                    } else {
-                        // Return to vertical stream
-                        this.x += (this.originX - this.x) * 0.04;
-                    }
-                } else {
-                    // Smooth idle return
-                    this.x += (this.originX - this.x) * 0.04;
-                }
-            }
-            draw() {
-                ctx.fillStyle = `rgba(255,255,255,${this.opacity})`;
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
-            }
+            constructor() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.s = Math.random()*1.5; this.v = Math.random()*0.5; }
+            draw() { ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI*2); ctx.fill(); }
+            update() { this.y += this.v; if(this.y > canvas.height) this.y = 0; }
         }
-
-        function init() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            stars = [];
-            for (let i = 0; i < 550; i++) stars.push(new Star());
-        }
-
-        window.addEventListener('mousemove', (e) => { 
-            mouse.x = e.clientX; 
-            mouse.y = e.clientY; 
-            mouse.active = true;
-            
-            // Idle check: if mouse stops moving for 1s, stars stop reacting
-            clearTimeout(mouse.timer);
-            mouse.timer = setTimeout(() => {
-                mouse.active = false;
-            }, 1000);
-        });
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            stars.forEach(s => { s.update(); s.draw(); });
-            requestAnimationFrame(animate);
-        }
-
-        init(); animate();
-        window.addEventListener('resize', init);
+        function init() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; stars = []; for(let i=0; i<400; i++) stars.push(new Star()); }
+        function anim() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.update();s.draw();}); requestAnimationFrame(anim); }
+        init(); anim(); window.addEventListener('resize', init);
     </script>
 </body>
 </html>
