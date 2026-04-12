@@ -50,18 +50,12 @@
             text-align: center;
             margin: 1.5rem 0;
             font-size: 0.8rem;
-            opacity: 0.4;
+            opacity: 0.6;
             color: var(--text);
             flex-shrink: 0;
+            justify-content: center;
+            white-space: nowrap;
         }
-        .or-separator::before, .or-separator::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid rgba(255,255,255,0.4);
-        }
-        /* Applied the "----------- OR ------------" style requested in history */
-        .or-separator:not(:empty)::before { margin-right: 1rem; content: "-----------"; }
-        .or-separator:not(:empty)::after { margin-left: 1rem; content: "-----------"; }
 
         input {
             width: 100%; padding: 14px; margin: 8px 0; background: var(--input-bg);
@@ -69,6 +63,7 @@
             outline: none; transition: 0.3s; flex-shrink: 0;
         }
         input:focus { border-color: var(--primary); }
+        input:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .google-btn-wrapper { position: relative; width: 100%; height: 48px; margin-top: 10px; flex-shrink: 0; }
         .connecting-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: var(--primary); font-weight: 600; animation: pulse 1.5s infinite; pointer-events: none; }
@@ -105,12 +100,13 @@
 
         .err-hint { color: var(--error); font-size: 0.75rem; display: none; margin-top: -4px; margin-bottom: 8px; font-weight: 500; }
         .req-list { list-style: none; margin-bottom: 10px; }
-        .req-list li { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+        .req-list li { font-size: 0.7rem; color: rgba(255,255,255,0.4); transition: 0.3s; }
         .req-list li.pass { color: var(--success); }
         .req-list li.fail { color: var(--error); }
 
-        .small-link { font-size: 0.75rem; color: rgba(255,255,255,0.4); cursor: pointer; text-decoration: underline; background: none; border: none; margin: 10px 0; }
-        .label-text { font-size: 0.85rem; color: var(--primary); font-weight: 600; }
+        .small-link { font-size: 0.75rem; color: rgba(255,255,255,0.4); cursor: pointer; text-decoration: underline; background: none; border: none; outline: none; transition: 0.2s; }
+        .small-link:hover { color: var(--primary); }
+        .label-text { font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -129,7 +125,7 @@
                     <p id="loginErr" class="err-hint" style="text-align: center;"></p>
                     <button class="main-btn" id="loginBtnAction">LOGIN</button>
                     
-                    <div class="or-separator">OR</div>
+                    <div class="or-separator">----------- OR -----------</div>
 
                     <div class="google-btn-wrapper">
                         <div class="connecting-text">Connecting...</div>
@@ -138,7 +134,7 @@
                             Continue with Google
                         </button>
                     </div>
-                    <button class="small-link" style="width:100%" onclick="toggleFlip()">Don't have an account? Sign Up</button>
+                    <button class="small-link" style="margin-top: 20px; text-align: center; display: block; width: 100%;" onclick="toggleFlip()">Don't have an account? Sign Up</button>
                 </div>
             </div>
 
@@ -151,7 +147,7 @@
                     <input type="password" id="rawPass" placeholder="Password">
                     <button class="main-btn" onclick="openCreateAccount(document.getElementById('rawEmail').value)">SIGN UP</button>
                     
-                    <div class="or-separator">OR</div>
+                    <div class="or-separator">----------- OR -----------</div>
 
                     <div class="google-btn-wrapper">
                         <div class="connecting-text">Connecting...</div>
@@ -160,7 +156,7 @@
                             Continue with Google
                         </button>
                     </div>
-                    <button class="small-link" style="width:100%" onclick="toggleFlip()">Already have an account? Login</button>
+                    <button class="small-link" style="margin-top: 20px; text-align: center; display: block; width: 100%;" onclick="toggleFlip()">Already have an account? Login</button>
                 </div>
             </div>
         </div>
@@ -205,7 +201,7 @@
 
                 <div class="step-content" id="step5">
                     <p style="text-align: center;">Verification sent to <br><strong id="displayEmail"></strong></p>
-                    <p id="otpErr" class="err-hint" style="text-align:center; margin-top: 10px;">Email not verified yet. Check your inbox!</p>
+                    <p id="otpErr" class="err-hint" style="text-align:center; margin-top: 10px;">Email not verified yet.</p>
                     <button class="small-link" id="resendBtn" style="display:block; margin: 15px auto;"></button>
                 </div>
 
@@ -241,48 +237,52 @@
         let timerVal = 30;
         let countdown;
 
-        // 1. Initial Load Logic
+        // Load Logic
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const loader = document.getElementById('loader');
-                loader.style.opacity = '0';
-                setTimeout(() => loader.style.display = 'none', 600);
+                if(loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 600);
+                }
             }, 1000);
             triggerGoogleReveal();
         });
 
-        // 2. Google Reveal Animation
+        // Google Reveal
         function triggerGoogleReveal() {
             const btns = document.querySelectorAll('.google-btn');
             btns.forEach(b => b.classList.remove('visible'));
             setTimeout(() => btns.forEach(b => b.classList.add('visible')), 1500);
         }
 
-        // 3. Auth State (NO AUTO REDIRECT FOR EMAIL USERS)
+        // AUTH LISTENER: Prevents auto-redirect while in Step 5
         onAuthStateChanged(auth, (user) => {
-            // We only auto-redirect if they are ALREADY verified and just refreshed the page
-            // Or if they just logged in via Google (which is verified by default)
             if (user && user.emailVerified && currentStep !== 5) {
                 window.location.href = "https://mrloudkeyboard.github.io/dashboard";
             }
         });
 
-        // 4. Manual Login
+        // Login Action
         document.getElementById('loginBtnAction').addEventListener('click', async () => {
             const email = document.getElementById('loginUser').value;
             const pass = document.getElementById('loginPass').value;
+            const errEl = document.getElementById('loginErr');
             try {
                 const res = await signInWithEmailAndPassword(auth, email, pass);
                 if(res.user.emailVerified) {
                     window.location.href = "https://mrloudkeyboard.github.io/dashboard";
                 } else {
-                    document.getElementById('loginErr').innerText = "Verify your email first.";
-                    document.getElementById('loginErr').style.display = "block";
+                    errEl.innerText = "Please verify your email first.";
+                    errEl.style.display = "block";
                 }
-            } catch (e) { document.getElementById('loginErr').style.display = "block"; document.getElementById('loginErr').innerText = "Invalid Login"; }
+            } catch (e) { 
+                errEl.innerText = "Invalid credentials";
+                errEl.style.display = "block"; 
+            }
         });
 
-        // 5. Google Login (Instant Redirect because Google is trusted)
+        // Google Action
         document.querySelectorAll('.googleAuthBtn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 try {
@@ -292,7 +292,7 @@
             });
         });
 
-        // 6. Multi-Step Modal Logic
+        // Modal Step Logic
         window.nextStep = async () => {
             if (!validateCurrentStep()) return;
 
@@ -306,18 +306,28 @@
                         currentStep = 5;
                         setStep(5);
                         startCountdown();
-                    } catch (e) { alert(e.message); closeModal(); }
+                    } catch (e) { 
+                        alert(e.message); 
+                        closeModal(); 
+                    }
                 });
                 return;
             }
 
-            // STEP 5: MANUAL CHECK (NO AUTO REDIRECT)
             if (currentStep === 5) {
+                const loader = document.getElementById('modalLoader');
+                const body = document.getElementById('modalBody');
+                body.style.display = 'none';
+                loader.style.display = 'block';
+
                 await auth.currentUser.reload();
                 if (auth.currentUser.emailVerified) {
                     window.location.href = "https://mrloudkeyboard.github.io/dashboard";
                 } else {
+                    loader.style.display = 'none';
+                    body.style.display = 'block';
                     document.getElementById('otpErr').style.display = 'block';
+                    document.getElementById('otpErr').innerText = "Not verified yet. Check your inbox!";
                 }
                 return;
             }
@@ -337,13 +347,16 @@
         }
 
         function validateCurrentStep() {
+            if(currentStep === 2) return document.getElementById('signupUser').value.length >= 4;
             if(currentStep === 3) {
                 const v = document.getElementById('signupPass').value;
-                const ok = v.length >= 8 && /[A-Z]/.test(v) && /[!@#$%^&*]/.test(v);
-                document.getElementById('req-len').className = v.length >= 8 ? 'pass' : 'fail';
-                document.getElementById('req-cap').className = /[A-Z]/.test(v) ? 'pass' : 'fail';
-                document.getElementById('req-spec').className = /[!@#$%^&*]/.test(v) ? 'pass' : 'fail';
-                return ok;
+                const hasLen = v.length >= 8;
+                const hasCap = /[A-Z]/.test(v);
+                const hasSpec = /[!@#$%^&*]/.test(v);
+                document.getElementById('req-len').className = hasLen ? 'pass' : 'fail';
+                document.getElementById('req-cap').className = hasCap ? 'pass' : 'fail';
+                document.getElementById('req-spec').className = hasSpec ? 'pass' : 'fail';
+                return hasLen && hasCap && hasSpec;
             }
             if(currentStep === 4) return document.getElementById('signupRepeat').value === document.getElementById('signupPass').value;
             return true;
@@ -367,27 +380,34 @@
         }
 
         window.openCreateAccount = (e) => {
-            document.getElementById('signupEmail').value = e;
-            document.getElementById('displayEmail').innerText = e;
+            document.getElementById('signupEmail').value = e || "";
+            document.getElementById('displayEmail').innerText = e || "your email";
             document.getElementById('modalOverlay').style.display = 'flex';
             document.getElementById('uiWrapper').classList.add('blurred');
+            currentStep = 1;
             setStep(1);
         };
 
         window.closeModal = () => {
             document.getElementById('modalOverlay').style.display = 'none';
             document.getElementById('uiWrapper').classList.remove('blurred');
+            clearInterval(countdown);
         };
 
-        window.unlockEmail = () => { document.getElementById('signupEmail').disabled = false; };
+        window.unlockEmail = () => { document.getElementById('signupEmail').disabled = false; document.getElementById('signupEmail').focus(); };
         window.prevStep = () => { if(currentStep > 1) { currentStep--; setStep(currentStep); } };
+        
         function showStepLoading(cb) { 
             document.getElementById('modalBody').style.display = 'none'; 
             document.getElementById('modalLoader').style.display = 'block';
-            setTimeout(() => { document.getElementById('modalLoader').style.display = 'none'; document.getElementById('modalBody').style.display = 'block'; cb(); }, 500);
+            setTimeout(() => { 
+                document.getElementById('modalLoader').style.display = 'none'; 
+                document.getElementById('modalBody').style.display = 'block'; 
+                cb(); 
+            }, 500);
         }
 
-        // Starfield
+        // Canvas Starfield
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let stars = [];
