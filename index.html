@@ -2,9 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Google Minesweeper Pro</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Minesweeper</title>
     <link rel="stylesheet" href="style.css" />
+    <style>
+      /* Inline critical fix to prevent double-tap zoom on all game elements */
+      * {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        /* Prevents the 'pull-to-refresh' gesture which can interrupt gameplay */
+        overscroll-behavior-y: contain;
+        /* Prevents text selection when tapping rapidly */
+        user-select: none;
+        -webkit-user-select: none;
+      }
+    </style>
   </head>
   <body>
     <div id="game-container">
