@@ -200,6 +200,11 @@ function chord(r, c) {
   }
 }
 
+/**
+ * ANIMATED EXPLOSION
+ * Reveals mines/flags with 0.5s pause between each
+ * Waits 2s after done before showing UI
+ */
 async function explode(hitR, hitC) {
   gameOver = true;
   clearInterval(timerInterval);
@@ -210,15 +215,14 @@ async function explode(hitR, hitC) {
   trigger.el.innerText = "💣";
   screenShake(500);
 
-  // Initial pause after hitting the mine
+  // Initial dramatic pause after hitting the mine
   await new Promise((res) => setTimeout(res, 800));
 
-  // Loop through all tiles to reveal mines and flags
+  // Loop through all tiles to reveal mines and flags one by one
   for (let row of board) {
     for (let t of row) {
       if (t === trigger) continue;
 
-      // Check if it's a mine or a flag that needs revealing
       if (t.isMine || t.flagged) {
         sounds.reveal();
 
@@ -231,13 +235,13 @@ async function explode(hitR, hitC) {
           t.el.classList.add("false-flag");
         }
 
-        // Wait 0.5 seconds before revealing the next item
+        // Wait 0.5 seconds before showing the next one
         await new Promise((r) => setTimeout(r, 500));
       }
     }
   }
 
-  // Wait 2 seconds after the final reveal before showing UI
+  // Wait 2 seconds after the last bomb is revealed before popping up the UI
   setTimeout(() => {
     document.getElementById("result-title").innerText = "GAME OVER";
     showSummary();
@@ -340,5 +344,14 @@ window.onclick = (e) => {
   if (!e.target.classList.contains("tile") && !e.target.closest("#mobile-menu"))
     hideMobileMenu();
 };
+
+// MOBILE ZOOM FIX: Prevent default double-tap gesture programmatically
+document.addEventListener(
+  "dblclick",
+  function (e) {
+    e.preventDefault();
+  },
+  { passive: false }
+);
 
 init();
