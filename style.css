@@ -22,8 +22,12 @@ body {
   height: 100vh;
   margin: 0;
   overflow: hidden;
-  /* Prevents accidental zooming on mobile taps */
-  touch-action: manipulation;
+
+  /* CRITICAL MOBILE FIXES */
+  touch-action: manipulation; /* Disables double-tap zoom */
+  user-select: none; /* Prevents text selection on rapid clicks */
+  -webkit-user-select: none;
+  overscroll-behavior-y: contain; /* Prevents pull-to-refresh pull down */
 }
 
 #game-container {
@@ -62,10 +66,13 @@ body {
   font-size: 1.3rem;
   font-weight: 900;
   cursor: pointer;
-  user-select: none;
   border: 1px solid var(--outline);
   box-sizing: border-box;
   transition: filter 0.1s ease, background-color 0.2s ease;
+
+  /* Ensure individual tiles don't trigger zoom */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent; /* Removes the gray box on tap in Chrome/Safari */
 }
 
 .tile.light {
@@ -164,7 +171,7 @@ body {
   pointer-events: none;
 }
 
-/* Mobile Action Menu (The Dig/Flag popup) */
+/* Mobile Action Menu */
 #mobile-menu {
   position: absolute;
   display: none;
@@ -174,8 +181,9 @@ body {
   padding: 6px;
   z-index: 1000;
   gap: 12px;
-  transform: translate(-50%, -100%); /* Centers menu above the tap */
+  transform: translate(-50%, -100%);
   animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  touch-action: none; /* Block all gestures on the menu itself */
 }
 
 #mobile-menu button {
@@ -252,6 +260,7 @@ button {
   font-weight: bold;
   font-size: 1rem;
   transition: background 0.2s;
+  touch-action: manipulation;
 }
 button:hover {
   background: #5a8e36;
@@ -260,7 +269,6 @@ button:hover {
 /* RESPONSIVE SCALING */
 @media (max-width: 600px) {
   #board {
-    /* Scale tiles based on screen width so they don't overflow */
     grid-template-columns: repeat(10, 9vw);
     grid-template-rows: repeat(8, 9vw);
   }
