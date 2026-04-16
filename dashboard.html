@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cosmic | Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #7d5fff;
+        --bg: #050508;
+        --panel-bg: rgba(20, 20, 30, 0.95);
+        --sidebar-w: 260px;
+        --error: #ff4d4d;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: white;
+        font-family: "Inter", sans-serif;
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* --- Sidebar Layout --- */
+      #sidebar {
+        width: var(--sidebar-w);
+        height: 100vh;
+        background: rgba(10, 10, 15, 0.98);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        box-sizing: border-box;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+          margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s;
+        z-index: 2000;
+        flex-shrink: 0;
+        visibility: visible;
+      }
+
+      .logo-area {
+        font-weight: 600;
+        font-size: 1.2rem;
+        letter-spacing: 1px;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 10px;
+      }
+
+      .sidebar-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 10px 0 20px 0;
+        border: none;
+      }
+
+      #nav-links-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+      }
+
+      .nav-item {
+        padding: 12px 16px;
+        border-radius: 10px;
+        color: #888;
+        font-weight: 500;
+        transition: 0.2s;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .nav-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+      }
+      .nav-item.active {
+        background: var(--primary);
+        color: white;
+      }
+      .nav-item.loading {
+        background: rgba(125, 95, 255, 0.2);
+        color: var(--primary);
+        cursor: wait;
+      }
+
+      /* --- Hamburger Toggle --- */
+      #menu-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1100;
+        cursor: pointer;
+        background: var(--panel-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px;
+        border-radius: 8px;
+        display: none;
+      }
+      .bar {
+        width: 20px;
+        height: 2px;
+        background: white;
+        margin: 4px 0;
+      }
+      #close-sidebar {
+        cursor: pointer;
+        font-size: 11px;
+        color: #555;
+        transition: 0.2s;
+      }
+
+      /* --- Main Wrapper --- */
+      #main-wrapper {
+        flex: 1;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow-x: hidden;
+        overflow-y: auto;
+        scroll-behavior: smooth;
+      }
+
+      #main-content {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      /* --- COSMIC UI Elements --- */
+      .cosmic-header {
+        font-size: 5rem;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: 8px;
+        background: linear-gradient(to right, #7d5fff, #ff4d4d, #7d5fff);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientMove 3s linear infinite;
+      }
+
+      @keyframes gradientMove {
+        to {
+          background-position: 200% center;
+        }
+      }
+
+      .scroll-indicator {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #444;
+        font-weight: 600;
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+        animation: bounce 2s infinite;
+      }
+
+      @keyframes bounce {
+        0%,
+        20%,
+        50%,
+        80%,
+        100% {
+          transform: translateY(0) translateX(-50%);
+        }
+        40% {
+          transform: translateY(-10px) translateX(-50%);
+        }
+        60% {
+          transform: translateY(-5px) translateX(-50%);
+        }
+      }
+
+      /* --- Feature Cards --- */
+      .features-container {
+        padding: 100px 40px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        max-width: 1000px;
+        width: 100%;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+
+      .feature-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 30px;
+        border-radius: 20px;
+        text-align: left;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      .feature-card.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .feature-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--primary);
+        background: rgba(125, 95, 255, 0.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .feature-card h3 {
+        margin: 0 0 10px 0;
+        color: var(--primary);
+      }
+      .feature-card p {
+        margin: 0;
+        color: #888;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      /* --- Profile UI --- */
+      .nav-header {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        z-index: 100;
+      }
+
+      #pfp-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 600;
+        cursor: pointer;
+        background-size: cover;
+        background-position: center;
+        transition: 0.2s;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .profile-panel {
+        background: var(--panel-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 20px;
+        width: 220px;
+        opacity: 0;
+        transform: translateX(20px) scale(0.95);
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .profile-panel.active {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        pointer-events: all;
+      }
+
+      .user-info h4 {
+        margin: 0;
+        font-size: 1rem;
+      }
+      .user-info p {
+        margin: 4px 0 0;
+        font-size: 0.75rem;
+        color: #888;
+      }
+      .divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 15px 0;
+        border: none;
+        width: 100%;
+      }
+
+      .logout-btn-red {
+        background: var(--error);
+        color: white;
+        text-align: center;
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: 0.3s;
+        border: none;
+        width: 100%;
+        display: block;
+        box-sizing: border-box;
+      }
+      .logout-btn-red:hover {
+        filter: brightness(1.2);
+      }
+
+      /* --- Modal --- */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 3000;
+        backdrop-filter: blur(10px);
+      }
+      .modal-content {
+        background: #0f0f1a;
+        padding: 30px;
+        border-radius: 20px;
+        border: 1px solid var(--primary);
+        width: 100%;
+        max-width: 350px;
+        text-align: center;
+        box-sizing: border-box;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px;
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: white;
+        outline: none;
+      }
+
+      /* --- Sidebar State --- */
+      .sidebar-hidden #sidebar {
+        transform: translateX(-100%);
+        margin-left: calc(var(--sidebar-w) * -1);
+        visibility: hidden;
+      }
+      .sidebar-hidden #menu-toggle {
+        display: block;
+      }
+
+      @media (max-width: 768px) {
+        #sidebar {
+          position: fixed;
+          transform: translateX(-100%);
+          visibility: hidden;
+        }
+        #sidebar.mobile-active {
+          transform: translateX(0);
+          visibility: visible;
+        }
+        #menu-toggle {
+          display: block;
+        }
+        .cosmic-header {
+          font-size: 3rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="menu-toggle">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+
+    <nav id="sidebar">
+      <div class="logo-area">
+        <span>COSMIC</span>
+        <span id="close-sidebar">✕ CLOSE</span>
+      </div>
+      <hr class="sidebar-divider" />
+
+      <div id="nav-links-container"></div>
+
+      <button
+        class="logout-btn-red"
+        id="sidebar-logout"
+        style="margin-top: auto"
+      >
+        Logout
+      </button>
+    </nav>
+
+    <div id="main-wrapper">
+      <div class="nav-header">
+        <div id="profile-panel" class="profile-panel">
+          <div class="user-info">
+            <h4 id="panel-username">User</h4>
+            <p id="panel-email">email@example.com</p>
+          </div>
+          <hr class="divider" />
+          <div class="logout-btn-red" id="logout-trigger">Logout</div>
+        </div>
+        <div id="pfp-btn">?</div>
+      </div>
+
+      <div id="main-content">
+        <h1 class="cosmic-header">COSMIC</h1>
+        <p style="color: #666; margin-top: 20px">
+          Verification confirmed. Welcome back.
+        </p>
+        <div class="scroll-indicator">
+          <span style="margin-bottom: 5px">↓ SCROLL ↓</span>
+        </div>
+      </div>
+
+      <div class="features-container">
+        <div class="feature-card">
+          <h3>Fast Core</h3>
+          <p>
+            Built with optimized engines to ensure lightning fast response times
+            and zero lag.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3>Cloud Sync</h3>
+          <p>
+            Your profile, preferences, and data are synced across all devices
+            instantly.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3>Advanced Security</h3>
+          <p>
+            Industry-standard encryption keeps your account and data private at
+            all times.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="password-modal" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Create Password</h3>
+        <hr class="divider" />
+        <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px">
+          Set a password to enable direct login with your email.
+        </p>
+        <p id="modal-error" style="color: var(--error); font-size: 12px"></p>
+        <input
+          type="password"
+          id="new-password"
+          placeholder="Create Password"
+        />
+        <input
+          type="password"
+          id="repeat-password"
+          placeholder="Repeat Password"
+        />
+        <button
+          id="finish-password"
+          style="
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+          "
+        >
+          Finish
+        </button>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+        EmailAuthProvider,
+        linkWithCredential,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        onSnapshot,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAhHtBQUGzYS5sOSh4thghEeGimj9JN5cI",
+        authDomain: "cosmic-cfc13.firebaseapp.com",
+        projectId: "cosmic-cfc13",
+        storageBucket: "cosmic-cfc13.firebasestorage.app",
+        appId: "1:107175390315:web:c2b085ffb7904ce6a5552e",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // --- SCROLL ANIMATION ---
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) entry.target.classList.add("show");
+          });
+        },
+        { threshold: 0.1 }
+      );
+      document
+        .querySelectorAll(".feature-card")
+        .forEach((card) => observer.observe(card));
+
+      // --- SIDEBAR TOGGLES ---
+      const menuBtn = document.getElementById("menu-toggle");
+      const closeBtn = document.getElementById("close-sidebar");
+      const sidebar = document.getElementById("sidebar");
+
+      menuBtn.onclick = () => {
+        document.body.classList.remove("sidebar-hidden");
+        sidebar.classList.add("mobile-active");
+      };
+      closeBtn.onclick = () => {
+        document.body.classList.add("sidebar-hidden");
+        sidebar.classList.remove("mobile-active");
+      };
+
+      // --- DYNAMIC TABS LOGIC ---
+      function handleTabClick(el, url) {
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((i) => i.classList.remove("active"));
+        el.classList.add("active");
+        el.classList.add("loading");
+        setTimeout(() => {
+          window.location.href = "/" + url;
+        }, 400);
+      }
+
+      async function loadTabs() {
+        const container = document.getElementById("nav-links-container");
+        const currentPage =
+          window.location.pathname.split("/").pop() || "dashboard.html";
+
+        try {
+          const res = await fetch("/tabs.txt");
+          const text = await res.text();
+
+          // Split by double newline to get each block
+          const blocks = text.trim().split(/\n\s*\n/);
+
+          blocks.forEach((block) => {
+            let title = "",
+              url = "";
+            block.split("\n").forEach((line) => {
+              if (line.includes("Title =")) title = line.split("=")[1].trim();
+              if (line.includes("URL =")) url = line.split("=")[1].trim();
+            });
+
+            if (title && url) {
+              const div = document.createElement("div");
+              div.className = "nav-item";
+              div.innerText = title;
+
+              // Set Active state if URL matches current page
+              if (url === currentPage) div.classList.add("active");
+
+              div.onclick = () => handleTabClick(div, url);
+              container.appendChild(div);
+            }
+          });
+        } catch (e) {
+          console.error("Error loading tabs:", e);
+        }
+      }
+      loadTabs();
+
+      // --- FIREBASE AUTH ---
+      onAuthStateChanged(auth, (user) => {
+        if (user && user.emailVerified) {
+          const name = user.displayName || user.email.split("@")[0];
+          document.getElementById("panel-username").innerText = name;
+          document.getElementById("panel-email").innerText = user.email;
+
+          onSnapshot(doc(db, "pfps", user.uid), (snap) => {
+            const pfpBtn = document.getElementById("pfp-btn");
+            if (snap.exists() && snap.data().base64) {
+              pfpBtn.style.backgroundImage = `url(${snap.data().base64})`;
+              pfpBtn.innerText = "";
+            } else {
+              pfpBtn.innerText = name.charAt(0).toUpperCase();
+              pfpBtn.style.backgroundColor = "#7d5fff";
+              pfpBtn.style.backgroundImage = "none";
+            }
+          });
+
+          if (!user.providerData.some((p) => p.providerId === "password")) {
+            document.getElementById("password-modal").style.display = "flex";
+          }
+        } else {
+          window.location.href = "/index.html";
+        }
+      });
+
+      document.getElementById("finish-password").onclick = async () => {
+        const pass = document.getElementById("new-password").value;
+        const rep = document.getElementById("repeat-password").value;
+        const error = document.getElementById("modal-error");
+        if (pass.length < 8) {
+          error.innerText = "8+ characters required.";
+          return;
+        }
+        if (pass !== rep) {
+          error.innerText = "Passwords do not match.";
+          return;
+        }
+        try {
+          const credential = EmailAuthProvider.credential(
+            auth.currentUser.email,
+            pass
+          );
+          await linkWithCredential(auth.currentUser, credential);
+          document.getElementById("password-modal").style.display = "none";
+        } catch (err) {
+          error.innerText = err.message;
+        }
+      };
+
+      // --- PROFILE PANEL TOGGLE ---
+      document.getElementById("pfp-btn").onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById("profile-panel").classList.toggle("active");
+      };
+      window.onclick = () =>
+        document.getElementById("profile-panel").classList.remove("active");
+
+      const logout = () =>
+        signOut(auth).then(() => (window.location.href = "/index.html"));
+      document.getElementById("logout-trigger").onclick = logout;
+      document.getElementById("sidebar-logout").onclick = logout;
+    </script>
+  </body>
+</html>

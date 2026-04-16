@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cosmic | Authenticating</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #7d5fff;
+        --bg: #050508;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: white;
+        font-family: "Inter", sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .loader {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      p {
+        letter-spacing: 1px;
+        opacity: 0.8;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loader"></div>
+    <p id="status">Verifying Session...</p>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAhHtBQUGzYS5sOSh4thghEeGimj9JN5cI",
+        authDomain: "cosmic-cfc13.firebaseapp.com",
+        projectId: "cosmic-cfc13",
+        storageBucket: "cosmic-cfc13.firebasestorage.app",
+        messagingSenderId: "107175390315",
+        appId: "1:107175390315:web:c2b085ffb7904ce6a5552e",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      const randToken = () =>
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+
+      // Force minimum 1 second delay
+      const minWait = new Promise((resolve) => setTimeout(resolve, 1000));
+
+      onAuthStateChanged(auth, async (user) => {
+        await minWait;
+        if (user && user.emailVerified) {
+          window.location.href = `dashboard.html?session=${randToken()}`;
+        } else {
+          window.location.href = "index.html";
+        }
+      });
+    </script>
+  </body>
+</html>

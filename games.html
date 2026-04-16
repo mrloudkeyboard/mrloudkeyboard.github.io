@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cosmic | Games</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #7d5fff;
+        --bg: #050508;
+        --panel-bg: rgba(20, 20, 30, 0.95);
+        --sidebar-w: 260px;
+        --error: #ff4d4d;
+        --card-bg: rgba(255, 255, 255, 0.03);
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: white;
+        font-family: "Inter", sans-serif;
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* --- Sidebar Layout --- */
+      #sidebar {
+        width: var(--sidebar-w);
+        height: 100vh;
+        background: rgba(10, 10, 15, 0.98);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        box-sizing: border-box;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+          margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s;
+        z-index: 2000;
+        flex-shrink: 0;
+        visibility: visible;
+      }
+
+      .logo-area {
+        font-weight: 600;
+        font-size: 1.2rem;
+        letter-spacing: 1px;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 10px;
+      }
+
+      .sidebar-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 10px 0 20px 0;
+        border: none;
+      }
+
+      #nav-links-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+      }
+
+      .nav-item {
+        padding: 12px 16px;
+        border-radius: 10px;
+        color: #888;
+        font-weight: 500;
+        transition: 0.2s;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .nav-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+      }
+      .nav-item.active {
+        background: var(--primary);
+        color: white;
+      }
+      .nav-item.loading {
+        background: rgba(125, 95, 255, 0.2);
+        color: var(--primary);
+        cursor: wait;
+      }
+
+      /* --- Hamburger Toggle --- */
+      #menu-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1100;
+        cursor: pointer;
+        background: var(--panel-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px;
+        border-radius: 8px;
+        display: none;
+      }
+      .bar {
+        width: 20px;
+        height: 2px;
+        background: white;
+        margin: 4px 0;
+      }
+      #close-sidebar {
+        cursor: pointer;
+        font-size: 11px;
+        color: #555;
+        transition: 0.2s;
+      }
+
+      /* --- Sidebar States --- */
+      .sidebar-hidden #sidebar {
+        transform: translateX(-100%);
+        margin-left: calc(var(--sidebar-w) * -1);
+        visibility: hidden;
+      }
+      .sidebar-hidden #menu-toggle {
+        display: block;
+      }
+
+      /* --- Main Content --- */
+      #main-wrapper {
+        flex: 1;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+      #main-content {
+        padding: 80px 40px;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+
+      /* --- Game Grid --- */
+      .games-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+      }
+      .game-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        text-align: center;
+        padding-bottom: 15px;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      .game-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--primary);
+        background: rgba(125, 95, 255, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+      .game-thumb {
+        width: 100%;
+        aspect-ratio: 16/9;
+        background: #1a1a2e;
+        background-size: cover;
+        background-position: center;
+        margin-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .game-title {
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 0 10px;
+        color: #eee;
+      }
+
+      /* --- Profile UI --- */
+      .nav-header {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        z-index: 100;
+      }
+      #pfp-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 600;
+        cursor: pointer;
+        background-size: cover;
+        background-position: center;
+        transition: 0.2s;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+      .profile-panel {
+        background: var(--panel-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 20px;
+        width: 220px;
+        opacity: 0;
+        transform: translateX(20px) scale(0.95);
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .profile-panel.active {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        pointer-events: all;
+      }
+      .user-info h4 {
+        margin: 0;
+        font-size: 1rem;
+      }
+      .user-info p {
+        margin: 4px 0 0;
+        font-size: 0.75rem;
+        color: #888;
+      }
+      .divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 15px 0;
+        border: none;
+        width: 100%;
+      }
+
+      /* --- Global Buttons --- */
+      .logout-btn-red {
+        background: var(--error);
+        color: white;
+        width: 100%;
+        text-align: center;
+        font-size: 0.85rem;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        font-weight: 600;
+        box-sizing: border-box;
+      }
+      .logout-btn-red:hover {
+        filter: brightness(1.2);
+      }
+
+      @media (max-width: 768px) {
+        #sidebar {
+          position: fixed;
+          transform: translateX(-100%);
+          visibility: hidden;
+        }
+        #sidebar.mobile-active {
+          transform: translateX(0);
+          visibility: visible;
+        }
+        #menu-toggle {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="menu-toggle">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+
+    <nav id="sidebar">
+      <div class="logo-area">
+        <span>COSMIC</span>
+        <span id="close-sidebar">✕ CLOSE</span>
+      </div>
+      <hr class="sidebar-divider" />
+      <div id="nav-links-container"></div>
+      <button
+        class="logout-btn-red"
+        id="sidebar-logout"
+        style="margin-top: auto"
+      >
+        Logout
+      </button>
+    </nav>
+
+    <div id="main-wrapper">
+      <div class="nav-header">
+        <div id="profile-panel" class="profile-panel">
+          <div class="user-info">
+            <h4 id="panel-username">User</h4>
+            <p id="panel-email">email@example.com</p>
+          </div>
+          <hr class="divider" />
+          <div class="logout-btn-red" id="logout-trigger">Logout</div>
+        </div>
+        <div id="pfp-btn">?</div>
+      </div>
+
+      <div id="main-content">
+        <h1>Games</h1>
+        <p style="color: #888">Explore the collection and start playing.</p>
+
+        <div class="games-grid">
+          <a href="cosmicgames/minesweeper.html" class="game-card">
+            <div
+              class="game-thumb"
+              style="
+                background-image: url('https://wallpapercave.com/wp/wp12297108.jpg');
+              "
+            ></div>
+            <div class="game-title">Minesweeper</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        onSnapshot,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAhHtBQUGzYS5sOSh4thghEeGimj9JN5cI",
+        authDomain: "cosmic-cfc13.firebaseapp.com",
+        projectId: "cosmic-cfc13",
+        storageBucket: "cosmic-cfc13.firebasestorage.app",
+        appId: "1:107175390315:web:c2b085ffb7904ce6a5552e",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // --- SIDEBAR TOGGLES ---
+      const menuBtn = document.getElementById("menu-toggle");
+      const closeBtn = document.getElementById("close-sidebar");
+      const sidebar = document.getElementById("sidebar");
+
+      menuBtn.onclick = () => {
+        document.body.classList.remove("sidebar-hidden");
+        sidebar.classList.add("mobile-active");
+      };
+      closeBtn.onclick = () => {
+        document.body.classList.add("sidebar-hidden");
+        sidebar.classList.remove("mobile-active");
+      };
+
+      // --- DYNAMIC TABS LOGIC ---
+      function handleTabClick(el, url) {
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((i) => i.classList.remove("active"));
+        el.classList.add("active");
+        el.classList.add("loading");
+        setTimeout(() => {
+          window.location.href = "/" + url;
+        }, 400);
+      }
+
+      async function loadTabs() {
+        const container = document.getElementById("nav-links-container");
+        const currentPage =
+          window.location.pathname.split("/").pop() || "games.html";
+
+        try {
+          const res = await fetch("/tabs.txt");
+          const text = await res.text();
+          const blocks = text.trim().split(/\n\s*\n/);
+
+          blocks.forEach((block) => {
+            let title = "",
+              url = "";
+            block.split("\n").forEach((line) => {
+              if (line.includes("Title =")) title = line.split("=")[1].trim();
+              if (line.includes("URL =")) url = line.split("=")[1].trim();
+            });
+
+            if (title && url) {
+              const div = document.createElement("div");
+              div.className = "nav-item";
+              div.innerText = title;
+              if (url === currentPage) div.classList.add("active");
+
+              div.onclick = () => handleTabClick(div, url);
+              container.appendChild(div);
+            }
+          });
+        } catch (e) {
+          console.error("Error loading tabs:", e);
+        }
+      }
+      loadTabs();
+
+      // --- FIREBASE AUTH ---
+      onAuthStateChanged(auth, (user) => {
+        if (user && user.emailVerified) {
+          const name = user.displayName || user.email.split("@")[0];
+          document.getElementById("panel-username").innerText = name;
+          document.getElementById("panel-email").innerText = user.email;
+
+          onSnapshot(doc(db, "pfps", user.uid), (snap) => {
+            const pfpBtn = document.getElementById("pfp-btn");
+            if (snap.exists() && snap.data().base64) {
+              pfpBtn.style.backgroundImage = `url(${snap.data().base64})`;
+              pfpBtn.innerText = "";
+            } else {
+              pfpBtn.innerText = name.charAt(0).toUpperCase();
+              pfpBtn.style.backgroundColor = "#7d5fff";
+              pfpBtn.style.backgroundImage = "none";
+            }
+          });
+        } else {
+          window.location.href = "/index.html";
+        }
+      });
+
+      // --- PROFILE PANEL TOGGLE ---
+      document.getElementById("pfp-btn").onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById("profile-panel").classList.toggle("active");
+      };
+      window.onclick = () =>
+        document.getElementById("profile-panel").classList.remove("active");
+
+      const logout = () =>
+        signOut(auth).then(() => (window.location.href = "/index.html"));
+      document.getElementById("logout-trigger").onclick = logout;
+      document.getElementById("sidebar-logout").onclick = logout;
+    </script>
+  </body>
+</html>

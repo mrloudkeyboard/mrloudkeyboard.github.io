@@ -1,0 +1,8 @@
+Title = Dashboard
+URL = dashboard.html
+
+Title = Games
+URL = games.html
+
+Title = Settings
+URL = settings.html

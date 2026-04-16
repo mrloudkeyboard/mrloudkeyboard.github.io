@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Cosmic | Minesweeper</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #7d5fff;
+        --bg: #050508;
+        --panel-bg: rgba(20, 20, 30, 0.95);
+
+        /* Your Original Game Colors */
+        --bg-main: #4a752c;
+        --tile-light: #aad751;
+        --tile-dark: #a2d149;
+        --rev-light: #e5c29f;
+        --rev-dark: #d7b899;
+        --outline: rgba(0, 0, 0, 0.12);
+        --correct-flag: #4caf50;
+        --false-flag: #8b0000;
+        --unflagged-mine: #ff8a8a;
+        --trigger-mine: #ff0000;
+      }
+
+      * {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+        background-color: var(--bg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        overscroll-behavior-y: contain;
+        user-select: none;
+        -webkit-user-select: none;
+        color: white;
+      }
+
+      /* --- Cosmic UI Elements --- */
+      .back-btn {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: var(--panel-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 10px 18px;
+        border-radius: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: 0.2s;
+        z-index: 2000;
+      }
+      .back-btn:hover {
+        background: var(--primary);
+      }
+
+      .nav-header {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        z-index: 2000;
+      }
+      #pfp-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 600;
+        cursor: pointer;
+        background-size: cover;
+        background-position: center;
+        background-color: var(--primary);
+      }
+      .profile-panel {
+        background: var(--panel-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 20px;
+        width: 220px;
+        opacity: 0;
+        transform: translateX(20px) scale(0.95);
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .profile-panel.active {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        pointer-events: all;
+      }
+      .user-info h4 {
+        margin: 0;
+        font-size: 1rem;
+        color: white;
+      }
+      .user-info p {
+        margin: 4px 0 0;
+        font-size: 0.75rem;
+        color: #888;
+      }
+
+      .logout-btn {
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.8rem;
+        transition: 0.2s;
+      }
+      .logout-btn:hover {
+        background: #ff6b81;
+      }
+
+      /* --- Original Game Styling --- */
+      #game-container {
+        background-color: var(--bg-main);
+        padding: 12px;
+        border-radius: 12px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        max-width: 95vw;
+      }
+
+      #status-bar {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 20px;
+        color: white;
+        font-weight: 800;
+        font-size: 1.5rem;
+      }
+
+      #board {
+        display: grid;
+        grid-template-columns: repeat(10, 45px);
+        grid-template-rows: repeat(8, 45px);
+        border: 6px solid #578a34;
+        border-radius: 4px;
+        background-color: #578a34;
+      }
+
+      .tile {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        font-weight: 900;
+        cursor: pointer;
+        border: 1px solid var(--outline);
+        transition: filter 0.1s ease, background-color 0.2s ease;
+      }
+
+      .tile.light {
+        background-color: var(--tile-light);
+      }
+      .tile.dark {
+        background-color: var(--tile-dark);
+      }
+      .tile.rev-light {
+        background-color: var(--rev-light);
+      }
+      .tile.rev-dark {
+        background-color: var(--rev-dark);
+      }
+
+      /* Number Colors - Added !important to override the rev-light/dark defaults */
+      .n1 {
+        color: #1976d2 !important;
+      }
+      .n2 {
+        color: #388e3c !important;
+      }
+      .n3 {
+        color: #d32f2f !important;
+      }
+      .n4 {
+        color: #7b1fa2 !important;
+      }
+      .n5 {
+        color: #ff8f00 !important;
+      }
+      .n6 {
+        color: #00838f !important;
+      }
+      .n7 {
+        color: #37474f !important;
+      }
+      .n8 {
+        color: #424242 !important;
+      }
+
+      /* Stats Text Styling */
+      #stats-bar-bottom {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        color: #aaa;
+        text-align: center;
+      }
+      #stats-bar-bottom b {
+        color: white;
+      }
+
+      .correct-flag {
+        background-color: var(--correct-flag) !important;
+      }
+      .false-flag {
+        background-color: var(--false-flag) !important;
+      }
+      .unflagged-mine {
+        background-color: var(--unflagged-mine) !important;
+      }
+      .trigger-mine {
+        background-color: var(--trigger-mine) !important;
+        border: 1px solid white !important;
+      }
+
+      /* Modals */
+      #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+        transition: opacity 0.4s ease, visibility 0.4s;
+      }
+      .overlay-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      #popup {
+        background: white;
+        padding: 40px;
+        border-radius: 25px;
+        text-align: center;
+        color: #333;
+        transform: scale(0.5);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      #overlay:not(.overlay-hidden) #popup {
+        transform: scale(1);
+      }
+
+      #view-round-controls {
+        position: fixed;
+        bottom: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 2500;
+        transition: transform 0.4s ease, opacity 0.4s;
+      }
+      .controls-hidden {
+        transform: translateY(120px);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #mobile-menu {
+        position: absolute;
+        display: none;
+        background: white;
+        border-radius: 50px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        padding: 6px;
+        z-index: 1500;
+        gap: 12px;
+        transform: translate(-50%, -100%);
+      }
+
+      #mobile-menu button {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        background: #f0f0f0;
+        color: black;
+        border: none;
+      }
+
+      .shake {
+        animation: shake 0.2s infinite;
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        25% {
+          transform: translate(3px, 3px);
+        }
+        75% {
+          transform: translate(-3px, -3px);
+        }
+      }
+      .particle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        pointer-events: none;
+        animation: burst 0.6s forwards;
+        z-index: 1000;
+      }
+      @keyframes burst {
+        to {
+          transform: translate(var(--x), var(--y));
+          opacity: 0;
+        }
+      }
+
+      .game-btn {
+        background: #4a752c;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1rem;
+        transition: 0.2s;
+      }
+      .game-btn:hover {
+        background: #5a8e36;
+      }
+
+      @media (max-width: 600px) {
+        #board {
+          grid-template-columns: repeat(10, 9vw);
+          grid-template-rows: repeat(8, 9vw);
+        }
+        .tile {
+          width: 9vw;
+          height: 9vw;
+          font-size: 1.1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#" class="back-btn" id="leave-game">← Back</a>
+
+    <div class="nav-header">
+      <div id="profile-panel" class="profile-panel">
+        <div class="user-info">
+          <h4 id="panel-username">User</h4>
+          <p id="panel-email">email@example.com</p>
+        </div>
+        <button class="logout-btn" id="logout-trigger">Logout</button>
+      </div>
+      <div id="pfp-btn">?</div>
+    </div>
+
+    <div id="game-container">
+      <div id="status-bar">
+        <div class="stat">🚩 <span id="flag-count">10</span></div>
+        <div class="stat">⏱️ <span id="timer">000</span></div>
+      </div>
+      <div id="board"></div>
+    </div>
+
+    <div id="stats-bar-bottom">
+      Wins: <b id="ui-wins">0</b> | Losses: <b id="ui-losses">0</b><br />
+      Fastest: <b id="ui-best">--</b>s
+    </div>
+
+    <div id="overlay" class="overlay-hidden">
+      <div id="popup">
+        <h1 id="result-title">GAME OVER</h1>
+        <div class="summary-stats">
+          <p>Time spent: <span id="final-time">0</span>s</p>
+          <p>Flagged mines: <span id="final-flagged">0</span></p>
+          <p>Unflagged mines: <span id="final-unflagged">0</span></p>
+        </div>
+        <div class="popup-buttons">
+          <button class="game-btn" id="btn-play-again">Play Again</button>
+          <button class="game-btn" id="btn-view-round">View Round</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-round-controls" class="controls-hidden">
+      <button class="game-btn" id="btn-play-again-alt">Play Again</button>
+      <button class="game-btn" id="btn-view-summary">View Summary</button>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        onSnapshot,
+        updateDoc,
+        increment,
+        setDoc,
+        getDoc,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAhHtBQUGzYS5sOSh4thghEeGimj9JN5cI",
+        authDomain: "cosmic-cfc13.firebaseapp.com",
+        projectId: "cosmic-cfc13",
+        storageBucket: "cosmic-cfc13.firebasestorage.app",
+        appId: "1:107175390315:web:c2b085ffb7904ce6a5552e",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      let userRef = null;
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          const name = user.displayName || user.email.split("@")[0];
+          document.getElementById("panel-username").innerText = name;
+          document.getElementById("panel-email").innerText = user.email;
+
+          userRef = doc(db, "minesweeper_stats", user.uid);
+
+          onSnapshot(doc(db, "pfps", user.uid), (snap) => {
+            const btn = document.getElementById("pfp-btn");
+            if (snap.exists() && snap.data().base64) {
+              btn.style.backgroundImage = `url(${snap.data().base64})`;
+              btn.innerText = "";
+            } else {
+              btn.innerText = name.charAt(0).toUpperCase();
+            }
+          });
+
+          onSnapshot(userRef, (snap) => {
+            if (snap.exists()) {
+              const data = snap.data();
+              document.getElementById("ui-wins").innerText = data.wins || 0;
+              document.getElementById("ui-losses").innerText = data.losses || 0;
+              document.getElementById("ui-best").innerText =
+                data.bestTime || "--";
+            } else {
+              setDoc(userRef, { wins: 0, losses: 0, bestTime: null });
+            }
+          });
+        }
+      });
+
+      window.logGameResult = async (win, time) => {
+        if (!userRef) return;
+        const snap = await getDoc(userRef);
+
+        if (!snap.exists()) {
+          // Create the doc if it's the user's first ever game
+          await setDoc(userRef, {
+            wins: win ? 1 : 0,
+            losses: win ? 0 : 1,
+            bestTime: win ? time : null,
+          });
+          return;
+        }
+
+        if (win) {
+          const currentBest = snap.data().bestTime;
+          const updates = { wins: increment(1) };
+          if (currentBest === null || time < currentBest) {
+            updates.bestTime = time;
+          }
+          await updateDoc(userRef, updates);
+        } else {
+          await updateDoc(userRef, { losses: increment(1) });
+        }
+      };
+
+      document.getElementById("logout-trigger").onclick = () => signOut(auth);
+      document.getElementById("pfp-btn").onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById("profile-panel").classList.toggle("active");
+      };
+      window.onclick = () =>
+        document.getElementById("profile-panel").classList.remove("active");
+    </script>
+
+    <script>
+      const ROWS = 8,
+        COLS = 10,
+        MINES = 10;
+      let board = [],
+        firstClick = true,
+        gameOver = false,
+        timerInterval,
+        seconds = 0,
+        flags = MINES;
+      let activeMenuTile = null;
+
+      window.addEventListener("beforeunload", (e) => {
+        if (!gameOver && !firstClick) {
+          e.preventDefault();
+          e.returnValue = "";
+        }
+      });
+
+      document.getElementById("leave-game").onclick = (e) => {
+        if (!gameOver && !firstClick) {
+          if (
+            confirm(
+              "Are you sure you want to leave? All progress will be lost!"
+            )
+          ) {
+            window.location.href = "../games.html";
+          }
+        } else {
+          window.location.href = "../games.html";
+        }
+      };
+
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      function playTone(freq, type, duration, vol = 0.1) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          audioCtx.currentTime + duration
+        );
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      }
+
+      const sounds = {
+        dig: () => playTone(450, "sine", 0.1, 0.1),
+        flag: () => playTone(600, "triangle", 0.1, 0.1),
+        boom: () => playTone(70, "sawtooth", 0.6, 0.1),
+        reveal: () => playTone(250, "sine", 0.1, 0.08),
+        win: () => {
+          playTone(523, "sine", 0.2, 0.1);
+          setTimeout(() => playTone(659, "sine", 0.2, 0.1), 150);
+          setTimeout(() => playTone(784, "sine", 0.4, 0.1), 300);
+        },
+      };
+
+      function init() {
+        const boardEl = document.getElementById("board");
+        boardEl.innerHTML = "";
+        board = [];
+        firstClick = true;
+        gameOver = false;
+        seconds = 0;
+        flags = MINES;
+        clearInterval(timerInterval);
+        hideMobileMenu();
+        document.getElementById("timer").innerText = "000";
+        document.getElementById("flag-count").innerText = MINES;
+        document.getElementById("overlay").className = "overlay-hidden";
+        document.getElementById("view-round-controls").className =
+          "controls-hidden";
+
+        for (let r = 0; r < ROWS; r++) {
+          board[r] = [];
+          for (let c = 0; c < COLS; c++) {
+            const el = document.createElement("div");
+            el.className = `tile ${(r + c) % 2 === 0 ? "light" : "dark"}`;
+            el.onpointerdown = (e) => handleClick(e, r, c);
+            el.oncontextmenu = (e) => e.preventDefault();
+            boardEl.appendChild(el);
+            board[r][c] = {
+              r,
+              c,
+              isMine: false,
+              revealed: false,
+              flagged: false,
+              n: 0,
+              el,
+            };
+          }
+        }
+      }
+
+      function handleClick(e, r, c) {
+        if (gameOver) return;
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const isMobile = window.matchMedia("(max-width: 600px)").matches;
+        const t = board[r][c];
+        if (e.button === 2) {
+          toggleFlag(r, c);
+          return;
+        }
+        if (isMobile && !t.revealed) {
+          showMobileMenu(e, r, c);
+        } else {
+          if (t.revealed) {
+            chord(r, c);
+          } else {
+            if (firstClick) handleFirstClick(r, c);
+            reveal(r, c);
+          }
+        }
+      }
+
+      function showMobileMenu(e, r, c) {
+        let menu = document.getElementById("mobile-menu");
+        if (!menu) {
+          menu = document.createElement("div");
+          menu.id = "mobile-menu";
+          menu.innerHTML = `<button id="m-dig">⛏️</button><button id="m-flag">🚩</button>`;
+          document.body.appendChild(menu);
+          document.getElementById("m-dig").onclick = () => {
+            if (firstClick)
+              handleFirstClick(activeMenuTile.r, activeMenuTile.c);
+            reveal(activeMenuTile.r, activeMenuTile.c);
+            hideMobileMenu();
+          };
+          document.getElementById("m-flag").onclick = () => {
+            toggleFlag(activeMenuTile.r, activeMenuTile.c);
+            hideMobileMenu();
+          };
+        }
+        activeMenuTile = board[r][c];
+        menu.style.display = "flex";
+        menu.style.left = `${e.pageX}px`;
+        menu.style.top = `${e.pageY - 60}px`;
+      }
+
+      function hideMobileMenu() {
+        const menu = document.getElementById("mobile-menu");
+        if (menu) menu.style.display = "none";
+      }
+
+      function handleFirstClick(startR, startC) {
+        firstClick = false;
+        generateMines(startR, startC);
+        startTimer();
+        createBurst(board[startR][startC].el, "#e5c29f");
+      }
+
+      function generateMines(startR, startC) {
+        let count = 0;
+        while (count < MINES) {
+          let r = Math.floor(Math.random() * ROWS),
+            c = Math.floor(Math.random() * COLS);
+          if (
+            !board[r][c].isMine &&
+            (Math.abs(r - startR) > 1 || Math.abs(c - startC) > 1)
+          ) {
+            board[r][c].isMine = true;
+            count++;
+          }
+        }
+        board.forEach((row, r) =>
+          row.forEach((t, c) => {
+            if (t.isMine) return;
+            traverseNeighbors(r, c, (nr, nc) => {
+              if (board[nr][nc].isMine) t.n++;
+            });
+          })
+        );
+      }
+
+      function reveal(r, c) {
+        const t = board[r][c];
+        if (t.revealed || t.flagged) return;
+        t.revealed = true;
+        sounds.dig();
+
+        // Apply reveal classes
+        t.el.classList.add(
+          "revealed",
+          (r + c) % 2 === 0 ? "rev-light" : "rev-dark"
+        );
+
+        if (t.isMine) {
+          explode(r, c);
+          return;
+        }
+
+        if (t.n > 0) {
+          t.el.innerText = t.n;
+          // Apply the specific number color class
+          t.el.classList.add(`n${t.n}`);
+        } else {
+          traverseNeighbors(r, c, (nr, nc) => reveal(nr, nc));
+        }
+        checkWin();
+      }
+
+      function chord(r, c) {
+        let f = 0;
+        traverseNeighbors(r, c, (nr, nc) => {
+          if (board[nr][nc].flagged) f++;
+        });
+        if (f === board[r][c].n) {
+          traverseNeighbors(r, c, (nr, nc) => {
+            if (!board[nr][nc].revealed && !board[nr][nc].flagged)
+              reveal(nr, nc);
+          });
+        }
+      }
+
+      async function explode(hitR, hitC) {
+        gameOver = true;
+        clearInterval(timerInterval);
+        sounds.boom();
+        const trigger = board[hitR][hitC];
+        trigger.el.classList.add("trigger-mine");
+        trigger.el.innerText = "💣";
+        screenShake(500);
+
+        if (window.logGameResult) window.logGameResult(false);
+
+        await new Promise((res) => setTimeout(res, 800));
+
+        for (let row of board) {
+          for (let t of row) {
+            if (t === trigger) continue;
+            if (t.isMine || t.flagged) {
+              sounds.reveal();
+              if (t.isMine && t.flagged) {
+                t.el.classList.add("correct-flag");
+              } else if (t.isMine && !t.flagged) {
+                t.el.classList.add("unflagged-mine");
+                t.el.innerText = "💣";
+              } else if (!t.isMine && t.flagged) {
+                t.el.classList.add("false-flag");
+              }
+              await new Promise((r) => setTimeout(r, 240)); // Sped up reveal for better feel
+            }
+          }
+        }
+        setTimeout(() => {
+          document.getElementById("result-title").innerText = "GAME OVER";
+          showSummary();
+        }, 600);
+      }
+
+      function toggleFlag(r, c) {
+        const t = board[r][c];
+        if (t.revealed) return;
+        t.flagged = !t.flagged;
+        t.el.innerText = t.flagged ? "🚩" : "";
+        flags += t.flagged ? -1 : 1;
+        document.getElementById("flag-count").innerText = flags;
+        sounds.flag();
+      }
+
+      function traverseNeighbors(r, c, cb) {
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            let nr = r + dr,
+              nc = c + dc;
+            if (
+              nr >= 0 &&
+              nr < ROWS &&
+              nc >= 0 &&
+              nc < COLS &&
+              !(dr == 0 && dc == 0)
+            )
+              cb(nr, nc);
+          }
+        }
+      }
+
+      function createBurst(el, color) {
+        const rect = el.getBoundingClientRect();
+        for (let i = 0; i < 10; i++) {
+          const p = document.createElement("div");
+          p.className = "particle";
+          p.style.backgroundColor = color;
+          p.style.left = `${rect.left + rect.width / 2}px`;
+          p.style.top = `${rect.top + rect.height / 2}px`;
+          p.style.setProperty("--x", `${(Math.random() - 0.5) * 80}px`);
+          p.style.setProperty("--y", `${(Math.random() - 0.5) * 80}px`);
+          document.body.appendChild(p);
+          setTimeout(() => p.remove(), 600);
+        }
+      }
+
+      function screenShake(ms) {
+        document.body.classList.add("shake");
+        setTimeout(() => document.body.classList.remove("shake"), ms);
+      }
+
+      function startTimer() {
+        timerInterval = setInterval(() => {
+          seconds++;
+          document.getElementById("timer").innerText = seconds
+            .toString()
+            .padStart(3, "0");
+        }, 1000);
+      }
+
+      function showSummary() {
+        document.getElementById("final-time").innerText = seconds;
+        let f = 0,
+          u = 0;
+        board.forEach((row) =>
+          row.forEach((t) => {
+            if (t.isMine) t.flagged ? f++ : u++;
+          })
+        );
+        document.getElementById("final-flagged").innerText = f;
+        document.getElementById("final-unflagged").innerText = u;
+        document.getElementById("overlay").className = "";
+      }
+
+      function checkWin() {
+        let safe = 0;
+        board.forEach((row) =>
+          row.forEach((t) => {
+            if (!t.isMine && !t.revealed) safe++;
+          })
+        );
+        if (safe === 0) {
+          gameOver = true;
+          clearInterval(timerInterval);
+          sounds.win();
+
+          if (window.logGameResult) window.logGameResult(true, seconds);
+
+          document.getElementById("result-title").innerText = "CLEARED!";
+          showSummary();
+        }
+      }
+
+      document.getElementById("btn-play-again").onclick = init;
+      document.getElementById("btn-play-again-alt").onclick = init;
+      document.getElementById("btn-view-round").onclick = () => {
+        document.getElementById("overlay").className = "overlay-hidden";
+        document.getElementById("view-round-controls").className = "";
+      };
+      document.getElementById("btn-view-summary").onclick = () => {
+        document.getElementById("overlay").className = "";
+        document.getElementById("view-round-controls").className =
+          "controls-hidden";
+      };
+
+      window.onclick = (e) => {
+        if (
+          !e.target.classList.contains("tile") &&
+          !e.target.closest("#mobile-menu")
+        )
+          hideMobileMenu();
+      };
+      document.addEventListener(
+        "dblclick",
+        (e) => {
+          e.preventDefault();
+        },
+        { passive: false }
+      );
+
+      init();
+    </script>
+  </body>
+</html>
