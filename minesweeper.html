@@ -45,6 +45,7 @@
         justify-content: center;
         height: 100vh;
         margin: 0;
+        padding: 0;
         overflow: hidden;
         overscroll-behavior-y: contain;
         user-select: none;
@@ -149,6 +150,7 @@
         border-radius: 12px;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
         max-width: 95vw;
+        position: relative;
       }
 
       #status-bar {
@@ -195,7 +197,14 @@
         background-color: var(--rev-dark);
       }
 
-      /* Number Colors - Added !important to override the rev-light/dark defaults */
+      /* Highlight for mobile action */
+      .tile.highlight {
+        outline: 3px solid white;
+        outline-offset: -3px;
+        z-index: 10;
+        filter: brightness(1.2);
+      }
+
       .n1 {
         color: #1976d2 !important;
       }
@@ -221,7 +230,6 @@
         color: #424242 !important;
       }
 
-      /* Stats Text Styling */
       #stats-bar-bottom {
         margin-top: 15px;
         font-size: 0.9rem;
@@ -298,18 +306,18 @@
         display: none;
         background: white;
         border-radius: 50px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        padding: 6px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        padding: 8px;
         z-index: 1500;
         gap: 12px;
-        transform: translate(-50%, -100%);
+        transform: translateX(-50%);
+        /* Default state is above the tile */
       }
 
       #mobile-menu button {
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -317,6 +325,10 @@
         background: #f0f0f0;
         color: black;
         border: none;
+        cursor: pointer;
+      }
+      #mobile-menu button:active {
+        background: #ddd;
       }
 
       .shake {
@@ -460,9 +472,7 @@
           const name = user.displayName || user.email.split("@")[0];
           document.getElementById("panel-username").innerText = name;
           document.getElementById("panel-email").innerText = user.email;
-
           userRef = doc(db, "minesweeper_stats", user.uid);
-
           onSnapshot(doc(db, "pfps", user.uid), (snap) => {
             const btn = document.getElementById("pfp-btn");
             if (snap.exists() && snap.data().base64) {
@@ -472,7 +482,6 @@
               btn.innerText = name.charAt(0).toUpperCase();
             }
           });
-
           onSnapshot(userRef, (snap) => {
             if (snap.exists()) {
               const data = snap.data();
@@ -490,9 +499,7 @@
       window.logGameResult = async (win, time) => {
         if (!userRef) return;
         const snap = await getDoc(userRef);
-
         if (!snap.exists()) {
-          // Create the doc if it's the user's first ever game
           await setDoc(userRef, {
             wins: win ? 1 : 0,
             losses: win ? 0 : 1,
@@ -500,13 +507,11 @@
           });
           return;
         }
-
         if (win) {
           const currentBest = snap.data().bestTime;
           const updates = { wins: increment(1) };
-          if (currentBest === null || time < currentBest) {
+          if (currentBest === null || time < currentBest)
             updates.bestTime = time;
-          }
           await updateDoc(userRef, updates);
         } else {
           await updateDoc(userRef, { losses: increment(1) });
@@ -517,9 +522,8 @@
       document.getElementById("pfp-btn").onclick = (e) => {
         e.stopPropagation();
         document.getElementById("profile-panel").classList.toggle("active");
+        window.hideMobileMenu();
       };
-      window.onclick = () =>
-        document.getElementById("profile-panel").classList.remove("active");
     </script>
 
     <script>
@@ -626,11 +630,14 @@
         if (audioCtx.state === "suspended") audioCtx.resume();
         const isMobile = window.matchMedia("(max-width: 600px)").matches;
         const t = board[r][c];
+
         if (e.button === 2) {
           toggleFlag(r, c);
           return;
         }
+
         if (isMobile && !t.revealed) {
+          e.stopPropagation(); // Prevent immediate window.onclick hiding
           showMobileMenu(e, r, c);
         } else {
           if (t.revealed) {
@@ -643,32 +650,57 @@
       }
 
       function showMobileMenu(e, r, c) {
+        hideMobileMenu(); // Clear existing
         let menu = document.getElementById("mobile-menu");
         if (!menu) {
           menu = document.createElement("div");
           menu.id = "mobile-menu";
           menu.innerHTML = `<button id="m-dig">⛏️</button><button id="m-flag">🚩</button>`;
           document.body.appendChild(menu);
-          document.getElementById("m-dig").onclick = () => {
-            if (firstClick)
-              handleFirstClick(activeMenuTile.r, activeMenuTile.c);
-            reveal(activeMenuTile.r, activeMenuTile.c);
+          document.getElementById("m-dig").onclick = (ev) => {
+            ev.stopPropagation();
+            if (activeMenuTile) {
+              if (firstClick)
+                handleFirstClick(activeMenuTile.r, activeMenuTile.c);
+              reveal(activeMenuTile.r, activeMenuTile.c);
+            }
             hideMobileMenu();
           };
-          document.getElementById("m-flag").onclick = () => {
-            toggleFlag(activeMenuTile.r, activeMenuTile.c);
+          document.getElementById("m-flag").onclick = (ev) => {
+            ev.stopPropagation();
+            if (activeMenuTile) toggleFlag(activeMenuTile.r, activeMenuTile.c);
             hideMobileMenu();
           };
         }
+
         activeMenuTile = board[r][c];
+        activeMenuTile.el.classList.add("highlight");
+
         menu.style.display = "flex";
-        menu.style.left = `${e.pageX}px`;
-        menu.style.top = `${e.pageY - 60}px`;
+
+        // Positioning Logic
+        const rect = activeMenuTile.el.getBoundingClientRect();
+        const menuWidth = 130; // Approx width
+        const menuHeight = 70;
+
+        let top = rect.top + window.scrollY - 70;
+        // If too close to top, show below instead
+        if (rect.top < 100) {
+          top = rect.bottom + window.scrollY + 10;
+        }
+
+        menu.style.left = `${rect.left + rect.width / 2}px`;
+        menu.style.top = `${top}px`;
       }
 
       function hideMobileMenu() {
         const menu = document.getElementById("mobile-menu");
         if (menu) menu.style.display = "none";
+        // Remove highlights from all tiles
+        board.forEach((row) =>
+          row.forEach((t) => t.el.classList.remove("highlight"))
+        );
+        activeMenuTile = null;
       }
 
       function handleFirstClick(startR, startC) {
@@ -706,21 +738,16 @@
         if (t.revealed || t.flagged) return;
         t.revealed = true;
         sounds.dig();
-
-        // Apply reveal classes
         t.el.classList.add(
           "revealed",
           (r + c) % 2 === 0 ? "rev-light" : "rev-dark"
         );
-
         if (t.isMine) {
           explode(r, c);
           return;
         }
-
         if (t.n > 0) {
           t.el.innerText = t.n;
-          // Apply the specific number color class
           t.el.classList.add(`n${t.n}`);
         } else {
           traverseNeighbors(r, c, (nr, nc) => reveal(nr, nc));
@@ -749,25 +776,20 @@
         trigger.el.classList.add("trigger-mine");
         trigger.el.innerText = "💣";
         screenShake(500);
-
         if (window.logGameResult) window.logGameResult(false);
-
         await new Promise((res) => setTimeout(res, 800));
-
         for (let row of board) {
           for (let t of row) {
             if (t === trigger) continue;
             if (t.isMine || t.flagged) {
               sounds.reveal();
-              if (t.isMine && t.flagged) {
-                t.el.classList.add("correct-flag");
-              } else if (t.isMine && !t.flagged) {
+              if (t.isMine && t.flagged) t.el.classList.add("correct-flag");
+              else if (t.isMine && !t.flagged) {
                 t.el.classList.add("unflagged-mine");
                 t.el.innerText = "💣";
-              } else if (!t.isMine && t.flagged) {
+              } else if (!t.isMine && t.flagged)
                 t.el.classList.add("false-flag");
-              }
-              await new Promise((r) => setTimeout(r, 240)); // Sped up reveal for better feel
+              await new Promise((r) => setTimeout(r, 100));
             }
           }
         }
@@ -858,9 +880,7 @@
           gameOver = true;
           clearInterval(timerInterval);
           sounds.win();
-
           if (window.logGameResult) window.logGameResult(true, seconds);
-
           document.getElementById("result-title").innerText = "CLEARED!";
           showSummary();
         }
@@ -878,13 +898,28 @@
           "controls-hidden";
       };
 
+      // GLOBAL CLICK HANDLER (Fixes the panel/menu hiding)
       window.onclick = (e) => {
-        if (
-          !e.target.classList.contains("tile") &&
-          !e.target.closest("#mobile-menu")
-        )
-          hideMobileMenu();
+        // Profile Panel
+        const prof = document.getElementById("profile-panel");
+        if (prof && !prof.contains(e.target) && e.target.id !== "pfp-btn") {
+          prof.classList.remove("active");
+        }
+
+        // Mobile Game Menu
+        const menu = document.getElementById("mobile-menu");
+        if (menu && menu.style.display === "flex") {
+          if (
+            !menu.contains(e.target) &&
+            !e.target.classList.contains("tile")
+          ) {
+            hideMobileMenu();
+          }
+        }
       };
+
+      window.hideMobileMenu = hideMobileMenu; // Expose to firebase script
+
       document.addEventListener(
         "dblclick",
         (e) => {
