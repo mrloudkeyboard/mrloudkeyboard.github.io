@@ -17,7 +17,6 @@
         --bg: #050508;
         --panel-bg: rgba(20, 20, 30, 0.95);
 
-        /* Your Original Game Colors */
         --bg-main: #4a752c;
         --tile-light: #aad751;
         --tile-dark: #a2d149;
@@ -45,7 +44,6 @@
         justify-content: center;
         height: 100vh;
         margin: 0;
-        padding: 0;
         overflow: hidden;
         overscroll-behavior-y: contain;
         user-select: none;
@@ -53,7 +51,6 @@
         color: white;
       }
 
-      /* --- Cosmic UI Elements --- */
       .back-btn {
         position: absolute;
         top: 20px;
@@ -143,14 +140,12 @@
         background: #ff6b81;
       }
 
-      /* --- Original Game Styling --- */
       #game-container {
         background-color: var(--bg-main);
         padding: 12px;
         border-radius: 12px;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
         max-width: 95vw;
-        position: relative;
       }
 
       #status-bar {
@@ -184,51 +179,27 @@
         transition: filter 0.1s ease, background-color 0.2s ease;
       }
 
-      .tile.light {
-        background-color: var(--tile-light);
-      }
-      .tile.dark {
-        background-color: var(--tile-dark);
-      }
-      .tile.rev-light {
-        background-color: var(--rev-light);
-      }
-      .tile.rev-dark {
-        background-color: var(--rev-dark);
+      .tile.light { background-color: var(--tile-light); }
+      .tile.dark  { background-color: var(--tile-dark);  }
+      .tile.rev-light { background-color: var(--rev-light); }
+      .tile.rev-dark  { background-color: var(--rev-dark);  }
+
+      /* Tile highlight when mobile menu is open */
+      .tile.selected-tile {
+        filter: brightness(1.35) saturate(1.2);
+        outline: 2px solid rgba(255, 255, 255, 0.8);
+        outline-offset: -2px;
+        z-index: 1;
       }
 
-      /* Highlight for mobile action */
-      .tile.highlight {
-        outline: 3px solid white;
-        outline-offset: -3px;
-        z-index: 10;
-        filter: brightness(1.2);
-      }
-
-      .n1 {
-        color: #1976d2 !important;
-      }
-      .n2 {
-        color: #388e3c !important;
-      }
-      .n3 {
-        color: #d32f2f !important;
-      }
-      .n4 {
-        color: #7b1fa2 !important;
-      }
-      .n5 {
-        color: #ff8f00 !important;
-      }
-      .n6 {
-        color: #00838f !important;
-      }
-      .n7 {
-        color: #37474f !important;
-      }
-      .n8 {
-        color: #424242 !important;
-      }
+      .n1 { color: #1976d2 !important; }
+      .n2 { color: #388e3c !important; }
+      .n3 { color: #d32f2f !important; }
+      .n4 { color: #7b1fa2 !important; }
+      .n5 { color: #ff8f00 !important; }
+      .n6 { color: #00838f !important; }
+      .n7 { color: #37474f !important; }
+      .n8 { color: #424242 !important; }
 
       #stats-bar-bottom {
         margin-top: 15px;
@@ -236,31 +207,17 @@
         color: #aaa;
         text-align: center;
       }
-      #stats-bar-bottom b {
-        color: white;
-      }
+      #stats-bar-bottom b { color: white; }
 
-      .correct-flag {
-        background-color: var(--correct-flag) !important;
-      }
-      .false-flag {
-        background-color: var(--false-flag) !important;
-      }
-      .unflagged-mine {
-        background-color: var(--unflagged-mine) !important;
-      }
-      .trigger-mine {
-        background-color: var(--trigger-mine) !important;
-        border: 1px solid white !important;
-      }
+      .correct-flag   { background-color: var(--correct-flag)   !important; }
+      .false-flag     { background-color: var(--false-flag)     !important; }
+      .unflagged-mine { background-color: var(--unflagged-mine) !important; }
+      .trigger-mine   { background-color: var(--trigger-mine)   !important; border: 1px solid white !important; }
 
-      /* Modals */
       #overlay {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
         background: rgba(0, 0, 0, 0.8);
         display: flex;
         align-items: center;
@@ -283,9 +240,7 @@
         transform: scale(0.5);
         transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
-      #overlay:not(.overlay-hidden) #popup {
-        transform: scale(1);
-      }
+      #overlay:not(.overlay-hidden) #popup { transform: scale(1); }
 
       #view-round-controls {
         position: fixed;
@@ -302,22 +257,21 @@
       }
 
       #mobile-menu {
-        position: absolute;
+        position: fixed;
         display: none;
         background: white;
         border-radius: 50px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-        padding: 8px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        padding: 6px;
         z-index: 1500;
         gap: 12px;
-        transform: translateX(-50%);
-        /* Default state is above the tile */
       }
 
       #mobile-menu button {
         width: 50px;
         height: 50px;
         border-radius: 50%;
+        padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -325,29 +279,16 @@
         background: #f0f0f0;
         color: black;
         border: none;
-        cursor: pointer;
-      }
-      #mobile-menu button:active {
-        background: #ddd;
       }
 
-      .shake {
-        animation: shake 0.2s infinite;
-      }
+      .shake { animation: shake 0.2s infinite; }
       @keyframes shake {
-        0%,
-        100% {
-          transform: translate(0, 0);
-        }
-        25% {
-          transform: translate(3px, 3px);
-        }
-        75% {
-          transform: translate(-3px, -3px);
-        }
+        0%, 100% { transform: translate(0, 0); }
+        25%       { transform: translate(3px, 3px); }
+        75%       { transform: translate(-3px, -3px); }
       }
       .particle {
-        position: absolute;
+        position: fixed;
         width: 6px;
         height: 6px;
         border-radius: 50%;
@@ -356,10 +297,7 @@
         z-index: 1000;
       }
       @keyframes burst {
-        to {
-          transform: translate(var(--x), var(--y));
-          opacity: 0;
-        }
+        to { transform: translate(var(--x), var(--y)); opacity: 0; }
       }
 
       .game-btn {
@@ -373,9 +311,7 @@
         font-size: 1rem;
         transition: 0.2s;
       }
-      .game-btn:hover {
-        background: #5a8e36;
-      }
+      .game-btn:hover { background: #5a8e36; }
 
       @media (max-width: 600px) {
         #board {
@@ -472,7 +408,9 @@
           const name = user.displayName || user.email.split("@")[0];
           document.getElementById("panel-username").innerText = name;
           document.getElementById("panel-email").innerText = user.email;
+
           userRef = doc(db, "minesweeper_stats", user.uid);
+
           onSnapshot(doc(db, "pfps", user.uid), (snap) => {
             const btn = document.getElementById("pfp-btn");
             if (snap.exists() && snap.data().base64) {
@@ -482,13 +420,13 @@
               btn.innerText = name.charAt(0).toUpperCase();
             }
           });
+
           onSnapshot(userRef, (snap) => {
             if (snap.exists()) {
               const data = snap.data();
               document.getElementById("ui-wins").innerText = data.wins || 0;
               document.getElementById("ui-losses").innerText = data.losses || 0;
-              document.getElementById("ui-best").innerText =
-                data.bestTime || "--";
+              document.getElementById("ui-best").innerText = data.bestTime || "--";
             } else {
               setDoc(userRef, { wins: 0, losses: 0, bestTime: null });
             }
@@ -510,8 +448,7 @@
         if (win) {
           const currentBest = snap.data().bestTime;
           const updates = { wins: increment(1) };
-          if (currentBest === null || time < currentBest)
-            updates.bestTime = time;
+          if (currentBest === null || time < currentBest) updates.bestTime = time;
           await updateDoc(userRef, updates);
         } else {
           await updateDoc(userRef, { losses: increment(1) });
@@ -519,23 +456,18 @@
       };
 
       document.getElementById("logout-trigger").onclick = () => signOut(auth);
-      document.getElementById("pfp-btn").onclick = (e) => {
+
+      // Use addEventListener so it doesn't conflict with the game script's global click handler
+      document.getElementById("pfp-btn").addEventListener("click", (e) => {
         e.stopPropagation();
         document.getElementById("profile-panel").classList.toggle("active");
-        window.hideMobileMenu();
-      };
+      });
     </script>
 
     <script>
-      const ROWS = 8,
-        COLS = 10,
-        MINES = 10;
-      let board = [],
-        firstClick = true,
-        gameOver = false,
-        timerInterval,
-        seconds = 0,
-        flags = MINES;
+      const ROWS = 8, COLS = 10, MINES = 10;
+      let board = [], firstClick = true, gameOver = false,
+          timerInterval, seconds = 0, flags = MINES;
       let activeMenuTile = null;
 
       window.addEventListener("beforeunload", (e) => {
@@ -547,11 +479,7 @@
 
       document.getElementById("leave-game").onclick = (e) => {
         if (!gameOver && !firstClick) {
-          if (
-            confirm(
-              "Are you sure you want to leave? All progress will be lost!"
-            )
-          ) {
+          if (confirm("Are you sure you want to leave? All progress will be lost!")) {
             window.location.href = "../games.html";
           }
         } else {
@@ -566,10 +494,7 @@
         osc.type = type;
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
         gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(
-          0.0001,
-          audioCtx.currentTime + duration
-        );
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
@@ -577,9 +502,9 @@
       }
 
       const sounds = {
-        dig: () => playTone(450, "sine", 0.1, 0.1),
-        flag: () => playTone(600, "triangle", 0.1, 0.1),
-        boom: () => playTone(70, "sawtooth", 0.6, 0.1),
+        dig:    () => playTone(450, "sine", 0.1, 0.1),
+        flag:   () => playTone(600, "triangle", 0.1, 0.1),
+        boom:   () => playTone(70, "sawtooth", 0.6, 0.1),
         reveal: () => playTone(250, "sine", 0.1, 0.08),
         win: () => {
           playTone(523, "sine", 0.2, 0.1);
@@ -601,8 +526,7 @@
         document.getElementById("timer").innerText = "000";
         document.getElementById("flag-count").innerText = MINES;
         document.getElementById("overlay").className = "overlay-hidden";
-        document.getElementById("view-round-controls").className =
-          "controls-hidden";
+        document.getElementById("view-round-controls").className = "controls-hidden";
 
         for (let r = 0; r < ROWS; r++) {
           board[r] = [];
@@ -612,15 +536,7 @@
             el.onpointerdown = (e) => handleClick(e, r, c);
             el.oncontextmenu = (e) => e.preventDefault();
             boardEl.appendChild(el);
-            board[r][c] = {
-              r,
-              c,
-              isMine: false,
-              revealed: false,
-              flagged: false,
-              n: 0,
-              el,
-            };
+            board[r][c] = { r, c, isMine: false, revealed: false, flagged: false, n: 0, el };
           }
         }
       }
@@ -630,14 +546,8 @@
         if (audioCtx.state === "suspended") audioCtx.resume();
         const isMobile = window.matchMedia("(max-width: 600px)").matches;
         const t = board[r][c];
-
-        if (e.button === 2) {
-          toggleFlag(r, c);
-          return;
-        }
-
+        if (e.button === 2) { toggleFlag(r, c); return; }
         if (isMobile && !t.revealed) {
-          e.stopPropagation(); // Prevent immediate window.onclick hiding
           showMobileMenu(e, r, c);
         } else {
           if (t.revealed) {
@@ -650,57 +560,75 @@
       }
 
       function showMobileMenu(e, r, c) {
-        hideMobileMenu(); // Clear existing
+        // If tapping the same tile that's already selected, close the menu
+        if (activeMenuTile && activeMenuTile.r === r && activeMenuTile.c === c) {
+          hideMobileMenu();
+          return;
+        }
+
+        // Remove highlight from previous tile
+        if (activeMenuTile) {
+          activeMenuTile.el.classList.remove("selected-tile");
+        }
+
         let menu = document.getElementById("mobile-menu");
         if (!menu) {
           menu = document.createElement("div");
           menu.id = "mobile-menu";
           menu.innerHTML = `<button id="m-dig">⛏️</button><button id="m-flag">🚩</button>`;
           document.body.appendChild(menu);
-          document.getElementById("m-dig").onclick = (ev) => {
-            ev.stopPropagation();
-            if (activeMenuTile) {
-              if (firstClick)
-                handleFirstClick(activeMenuTile.r, activeMenuTile.c);
-              reveal(activeMenuTile.r, activeMenuTile.c);
-            }
-            hideMobileMenu();
-          };
-          document.getElementById("m-flag").onclick = (ev) => {
-            ev.stopPropagation();
-            if (activeMenuTile) toggleFlag(activeMenuTile.r, activeMenuTile.c);
-            hideMobileMenu();
-          };
         }
+
+        // Wire up buttons fresh each time so activeMenuTile is always current
+        document.getElementById("m-dig").onclick = (ev) => {
+          ev.stopPropagation();
+          if (firstClick) handleFirstClick(activeMenuTile.r, activeMenuTile.c);
+          reveal(activeMenuTile.r, activeMenuTile.c);
+          hideMobileMenu();
+        };
+        document.getElementById("m-flag").onclick = (ev) => {
+          ev.stopPropagation();
+          toggleFlag(activeMenuTile.r, activeMenuTile.c);
+          hideMobileMenu();
+        };
 
         activeMenuTile = board[r][c];
-        activeMenuTile.el.classList.add("highlight");
 
+        // Highlight the selected tile
+        activeMenuTile.el.classList.add("selected-tile");
+
+        // Use the tile's bounding rect for precise positioning (works for fixed layout)
+        const tileRect = activeMenuTile.el.getBoundingClientRect();
+        const menuWidth = 124;  // ~2 buttons * 50px + padding
+        const menuHeight = 62;
+        const margin = 8;
+
+        // Show offscreen temporarily to measure actual size, then position
+        menu.style.visibility = "hidden";
         menu.style.display = "flex";
 
-        // Positioning Logic
-        const rect = activeMenuTile.el.getBoundingClientRect();
-        const menuWidth = 130; // Approx width
-        const menuHeight = 70;
+        // Horizontal: center over tile, clamp to viewport
+        let left = tileRect.left + tileRect.width / 2 - menuWidth / 2;
+        left = Math.max(margin, Math.min(left, window.innerWidth - menuWidth - margin));
 
-        let top = rect.top + window.scrollY - 70;
-        // If too close to top, show below instead
-        if (rect.top < 100) {
-          top = rect.bottom + window.scrollY + 10;
+        // Vertical: prefer above tile, fall back to below if not enough room
+        let top = tileRect.top - menuHeight - margin;
+        if (top < margin) {
+          top = tileRect.bottom + margin;
         }
 
-        menu.style.left = `${rect.left + rect.width / 2}px`;
-        menu.style.top = `${top}px`;
+        menu.style.left = `${left}px`;
+        menu.style.top  = `${top}px`;
+        menu.style.visibility = "visible";
       }
 
       function hideMobileMenu() {
         const menu = document.getElementById("mobile-menu");
         if (menu) menu.style.display = "none";
-        // Remove highlights from all tiles
-        board.forEach((row) =>
-          row.forEach((t) => t.el.classList.remove("highlight"))
-        );
-        activeMenuTile = null;
+        if (activeMenuTile) {
+          activeMenuTile.el.classList.remove("selected-tile");
+          activeMenuTile = null;
+        }
       }
 
       function handleFirstClick(startR, startC) {
@@ -713,12 +641,8 @@
       function generateMines(startR, startC) {
         let count = 0;
         while (count < MINES) {
-          let r = Math.floor(Math.random() * ROWS),
-            c = Math.floor(Math.random() * COLS);
-          if (
-            !board[r][c].isMine &&
-            (Math.abs(r - startR) > 1 || Math.abs(c - startC) > 1)
-          ) {
+          let r = Math.floor(Math.random() * ROWS), c = Math.floor(Math.random() * COLS);
+          if (!board[r][c].isMine && (Math.abs(r - startR) > 1 || Math.abs(c - startC) > 1)) {
             board[r][c].isMine = true;
             count++;
           }
@@ -726,9 +650,7 @@
         board.forEach((row, r) =>
           row.forEach((t, c) => {
             if (t.isMine) return;
-            traverseNeighbors(r, c, (nr, nc) => {
-              if (board[nr][nc].isMine) t.n++;
-            });
+            traverseNeighbors(r, c, (nr, nc) => { if (board[nr][nc].isMine) t.n++; });
           })
         );
       }
@@ -738,14 +660,8 @@
         if (t.revealed || t.flagged) return;
         t.revealed = true;
         sounds.dig();
-        t.el.classList.add(
-          "revealed",
-          (r + c) % 2 === 0 ? "rev-light" : "rev-dark"
-        );
-        if (t.isMine) {
-          explode(r, c);
-          return;
-        }
+        t.el.classList.add("revealed", (r + c) % 2 === 0 ? "rev-light" : "rev-dark");
+        if (t.isMine) { explode(r, c); return; }
         if (t.n > 0) {
           t.el.innerText = t.n;
           t.el.classList.add(`n${t.n}`);
@@ -757,13 +673,10 @@
 
       function chord(r, c) {
         let f = 0;
-        traverseNeighbors(r, c, (nr, nc) => {
-          if (board[nr][nc].flagged) f++;
-        });
+        traverseNeighbors(r, c, (nr, nc) => { if (board[nr][nc].flagged) f++; });
         if (f === board[r][c].n) {
           traverseNeighbors(r, c, (nr, nc) => {
-            if (!board[nr][nc].revealed && !board[nr][nc].flagged)
-              reveal(nr, nc);
+            if (!board[nr][nc].revealed && !board[nr][nc].flagged) reveal(nr, nc);
           });
         }
       }
@@ -783,13 +696,10 @@
             if (t === trigger) continue;
             if (t.isMine || t.flagged) {
               sounds.reveal();
-              if (t.isMine && t.flagged) t.el.classList.add("correct-flag");
-              else if (t.isMine && !t.flagged) {
-                t.el.classList.add("unflagged-mine");
-                t.el.innerText = "💣";
-              } else if (!t.isMine && t.flagged)
-                t.el.classList.add("false-flag");
-              await new Promise((r) => setTimeout(r, 100));
+              if (t.isMine && t.flagged)        t.el.classList.add("correct-flag");
+              else if (t.isMine && !t.flagged)  { t.el.classList.add("unflagged-mine"); t.el.innerText = "💣"; }
+              else if (!t.isMine && t.flagged)  t.el.classList.add("false-flag");
+              await new Promise((r) => setTimeout(r, 240));
             }
           }
         }
@@ -812,16 +722,8 @@
       function traverseNeighbors(r, c, cb) {
         for (let dr = -1; dr <= 1; dr++) {
           for (let dc = -1; dc <= 1; dc++) {
-            let nr = r + dr,
-              nc = c + dc;
-            if (
-              nr >= 0 &&
-              nr < ROWS &&
-              nc >= 0 &&
-              nc < COLS &&
-              !(dr == 0 && dc == 0)
-            )
-              cb(nr, nc);
+            let nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && !(dr == 0 && dc == 0)) cb(nr, nc);
           }
         }
       }
@@ -833,7 +735,7 @@
           p.className = "particle";
           p.style.backgroundColor = color;
           p.style.left = `${rect.left + rect.width / 2}px`;
-          p.style.top = `${rect.top + rect.height / 2}px`;
+          p.style.top  = `${rect.top  + rect.height / 2}px`;
           p.style.setProperty("--x", `${(Math.random() - 0.5) * 80}px`);
           p.style.setProperty("--y", `${(Math.random() - 0.5) * 80}px`);
           document.body.appendChild(p);
@@ -849,21 +751,14 @@
       function startTimer() {
         timerInterval = setInterval(() => {
           seconds++;
-          document.getElementById("timer").innerText = seconds
-            .toString()
-            .padStart(3, "0");
+          document.getElementById("timer").innerText = seconds.toString().padStart(3, "0");
         }, 1000);
       }
 
       function showSummary() {
         document.getElementById("final-time").innerText = seconds;
-        let f = 0,
-          u = 0;
-        board.forEach((row) =>
-          row.forEach((t) => {
-            if (t.isMine) t.flagged ? f++ : u++;
-          })
-        );
+        let f = 0, u = 0;
+        board.forEach((row) => row.forEach((t) => { if (t.isMine) t.flagged ? f++ : u++; }));
         document.getElementById("final-flagged").innerText = f;
         document.getElementById("final-unflagged").innerText = u;
         document.getElementById("overlay").className = "";
@@ -871,11 +766,7 @@
 
       function checkWin() {
         let safe = 0;
-        board.forEach((row) =>
-          row.forEach((t) => {
-            if (!t.isMine && !t.revealed) safe++;
-          })
-        );
+        board.forEach((row) => row.forEach((t) => { if (!t.isMine && !t.revealed) safe++; }));
         if (safe === 0) {
           gameOver = true;
           clearInterval(timerInterval);
@@ -886,7 +777,7 @@
         }
       }
 
-      document.getElementById("btn-play-again").onclick = init;
+      document.getElementById("btn-play-again").onclick     = init;
       document.getElementById("btn-play-again-alt").onclick = init;
       document.getElementById("btn-view-round").onclick = () => {
         document.getElementById("overlay").className = "overlay-hidden";
@@ -894,39 +785,23 @@
       };
       document.getElementById("btn-view-summary").onclick = () => {
         document.getElementById("overlay").className = "";
-        document.getElementById("view-round-controls").className =
-          "controls-hidden";
+        document.getElementById("view-round-controls").className = "controls-hidden";
       };
 
-      // GLOBAL CLICK HANDLER (Fixes the panel/menu hiding)
-      window.onclick = (e) => {
-        // Profile Panel
-        const prof = document.getElementById("profile-panel");
-        if (prof && !prof.contains(e.target) && e.target.id !== "pfp-btn") {
-          prof.classList.remove("active");
+      // Single global click/touch handler — closes mobile menu AND profile panel
+      // when tapping anywhere outside them
+      document.addEventListener("click", (e) => {
+        // Close profile panel if click is outside pfp-btn and profile-panel
+        if (!e.target.closest("#pfp-btn") && !e.target.closest("#profile-panel")) {
+          document.getElementById("profile-panel").classList.remove("active");
         }
-
-        // Mobile Game Menu
-        const menu = document.getElementById("mobile-menu");
-        if (menu && menu.style.display === "flex") {
-          if (
-            !menu.contains(e.target) &&
-            !e.target.classList.contains("tile")
-          ) {
-            hideMobileMenu();
-          }
+        // Close mobile menu if click is outside a tile and outside the menu itself
+        if (!e.target.classList.contains("tile") && !e.target.closest("#mobile-menu")) {
+          hideMobileMenu();
         }
-      };
+      });
 
-      window.hideMobileMenu = hideMobileMenu; // Expose to firebase script
-
-      document.addEventListener(
-        "dblclick",
-        (e) => {
-          e.preventDefault();
-        },
-        { passive: false }
-      );
+      document.addEventListener("dblclick", (e) => e.preventDefault(), { passive: false });
 
       init();
     </script>
