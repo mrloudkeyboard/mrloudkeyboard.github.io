@@ -336,6 +336,22 @@
         background-position: center;
         border: 3px solid var(--primary);
       }
+
+      /* --- Mobile --- */
+      @media (max-width: 768px) {
+        #sidebar {
+          position: fixed;
+          transform: translateX(-100%);
+          visibility: hidden;
+        }
+        #sidebar.mobile-active {
+          transform: translateX(0);
+          visibility: visible;
+        }
+        #menu-toggle {
+          display: block;
+        }
+      }
     </style>
   </head>
   <body>
@@ -392,12 +408,12 @@
             </span>
           </div>
           <div class="settings-row">
-            <span class="label">Email</span
-            ><span id="display-email" class="value">---</span>
+            <span class="label">Email</span>
+            <span id="display-email" class="value">---</span>
           </div>
           <div class="settings-row">
-            <span class="label">Member Since</span
-            ><span id="display-date" class="value">---</span>
+            <span class="label">Member Since</span>
+            <span id="display-date" class="value">---</span>
           </div>
         </div>
 
@@ -524,8 +540,16 @@
       // --- Sidebar Logic ---
       const menuBtn = document.getElementById("menu-toggle");
       const closeBtn = document.getElementById("close-sidebar");
-      menuBtn.onclick = () => document.body.classList.remove("sidebar-hidden");
-      closeBtn.onclick = () => document.body.classList.add("sidebar-hidden");
+      const sidebar = document.getElementById("sidebar");
+
+      menuBtn.onclick = () => {
+        document.body.classList.remove("sidebar-hidden");
+        sidebar.classList.add("mobile-active");
+      };
+      closeBtn.onclick = () => {
+        document.body.classList.add("sidebar-hidden");
+        sidebar.classList.remove("mobile-active");
+      };
 
       // --- DYNAMIC TABS LOGIC ---
       function handleTabClick(el, url) {
