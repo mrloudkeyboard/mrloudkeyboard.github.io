@@ -4,5 +4,8 @@ URL = dashboard.html
 Title = Games
 URL = games.html
 
+Title = Cloaker
+URL = cloaker.html
+
 Title = Settings
 URL = settings.html
