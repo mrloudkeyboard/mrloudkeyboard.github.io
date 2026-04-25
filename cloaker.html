@@ -89,11 +89,6 @@
         background: var(--primary);
         color: white;
       }
-      .nav-item.loading {
-        background: rgba(125, 95, 255, 0.2);
-        color: var(--primary);
-        cursor: wait;
-      }
 
       /* --- Hamburger Toggle --- */
       #menu-toggle {
@@ -118,10 +113,8 @@
         cursor: pointer;
         font-size: 11px;
         color: #555;
-        transition: 0.2s;
       }
 
-      /* --- Sidebar States --- */
       .sidebar-hidden #sidebar {
         transform: translateX(-100%);
         margin-left: calc(var(--sidebar-w) * -1);
@@ -131,69 +124,72 @@
         display: block;
       }
 
-      /* --- Main Content --- */
+      /* --- Cloaker UI Central --- */
       #main-wrapper {
         flex: 1;
         height: 100vh;
         display: flex;
         flex-direction: column;
         position: relative;
-        overflow-x: hidden;
-        overflow-y: auto;
-      }
-      #main-content {
-        padding: 40px;
-        width: 100%;
-        max-width: 1200px;
-        margin: auto; /* Centers the content vertically and horizontally */
-        box-sizing: border-box;
-        text-align: center;
+        justify-content: center; /* Centers the input vertically */
+        align-items: center; /* Centers the input horizontally */
       }
 
-      /* --- Cloaker Input UI --- */
       .cloaker-container {
-        margin-top: 30px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-      }
-
-      .url-input {
+        text-align: center;
         width: 100%;
         max-width: 600px;
+        padding: 20px;
+      }
+
+      .cloaker-container h1 {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        font-weight: 800;
+        background: linear-gradient(to bottom, #fff, #666);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .input-group {
+        position: relative;
+        display: flex;
         background: var(--card-bg);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 18px 24px;
         border-radius: 14px;
-        color: white;
-        font-family: inherit;
-        font-size: 1.1rem;
-        outline: none;
+        padding: 8px;
         transition: 0.3s;
       }
 
-      .url-input:focus {
+      .input-group:focus-within {
         border-color: var(--primary);
-        background: rgba(125, 95, 255, 0.05);
         box-shadow: 0 0 20px rgba(125, 95, 255, 0.2);
       }
 
-      .cloak-btn {
-        background: var(--primary);
-        color: white;
+      #url-input {
+        flex: 1;
+        background: transparent;
         border: none;
-        padding: 14px 40px;
+        outline: none;
+        color: white;
+        padding: 12px 20px;
+        font-size: 1rem;
+        font-family: inherit;
+      }
+
+      #launch-btn {
+        background: var(--primary);
+        border: none;
+        color: white;
+        padding: 0 25px;
         border-radius: 10px;
         font-weight: 600;
-        font-size: 1rem;
         cursor: pointer;
         transition: 0.2s;
       }
 
-      .cloak-btn:hover {
-        filter: brightness(1.1);
-        transform: translateY(-2px);
+      #launch-btn:hover {
+        filter: brightness(1.2);
       }
 
       /* --- Profile UI --- */
@@ -218,8 +214,6 @@
         cursor: pointer;
         background-size: cover;
         background-position: center;
-        transition: 0.2s;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       }
       .profile-panel {
         background: var(--panel-bg);
@@ -238,76 +232,41 @@
         transform: translateX(0) scale(1);
         pointer-events: all;
       }
-      .user-info h4 {
-        margin: 0;
-        font-size: 1rem;
-      }
-      .user-info p {
-        margin: 4px 0 0;
-        font-size: 0.75rem;
-        color: #888;
-      }
-      .divider {
-        height: 1px;
-        background: rgba(255, 255, 255, 0.1);
-        margin: 15px 0;
-        border: none;
-        width: 100%;
-      }
 
-      /* --- Global Buttons --- */
       .logout-btn-red {
         background: var(--error);
         color: white;
         width: 100%;
         text-align: center;
-        font-size: 0.85rem;
         padding: 10px;
         border-radius: 8px;
         cursor: pointer;
         border: none;
         font-weight: 600;
-        box-sizing: border-box;
-      }
-      .logout-btn-red:hover {
-        filter: brightness(1.2);
       }
 
       @media (max-width: 768px) {
-        #sidebar {
-          position: fixed;
-          transform: translateX(-100%);
-          visibility: hidden;
-        }
-        #sidebar.mobile-active {
-          transform: translateX(0);
-          visibility: visible;
-        }
-        #menu-toggle {
-          display: block;
-        }
+        #sidebar { position: fixed; transform: translateX(-100%); visibility: hidden; }
+        #sidebar.mobile-active { transform: translateX(0); visibility: visible; }
+        #menu-toggle { display: block; }
       }
     </style>
   </head>
-  <body>
+  <body class="sidebar-hidden">
     <div id="menu-toggle">
       <div class="bar"></div>
       <div class="bar"></div>
-      <div class="bar);</div>
+      <div class="bar"></div>
     </div>
 
     <nav id="sidebar">
       <div class="logo-area">
-        <span>COSMIC</span>
+        <span>CLOAKER</span>
         <span id="close-sidebar">✕ CLOSE</span>
       </div>
       <hr class="sidebar-divider" />
       <div id="nav-links-container"></div>
-      <button
-        class="logout-btn-red"
-        id="sidebar-logout"
-        style="margin-top: auto"
-      >
+      <button class="logout-btn-red" id="sidebar-logout" style="margin-top: auto">
         Logout
       </button>
     </nav>
@@ -319,40 +278,26 @@
             <h4 id="panel-username">User</h4>
             <p id="panel-email">email@example.com</p>
           </div>
-          <hr class="divider" />
+          <hr style="opacity: 0.1; margin: 15px 0;" />
           <div class="logout-btn-red" id="logout-trigger">Logout</div>
         </div>
         <div id="pfp-btn">?</div>
       </div>
 
-      <div id="main-content">
-        <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Cloaker</h1>
-        <p style="color: #888">Enter a URL to open it in a hidden about:blank tab.</p>
-
-        <div class="cloaker-container">
-          <input 
-            type="text" 
-            id="url-input" 
-            class="url-input" 
-            placeholder="https://example.com"
-          />
-          <button class="cloak-btn" id="search-btn">Launch Cloak</button>
+      <div class="cloaker-container">
+        <h1>Cloaker</h1>
+        <p style="color: #666; margin-bottom: 30px;">Enter a URL to open in a hidden tab.</p>
+        <div class="input-group">
+          <input type="text" id="url-input" placeholder="https://google.com" autofocus autocomplete="off" />
+          <button id="launch-btn">Launch</button>
         </div>
       </div>
     </div>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import {
-        getAuth,
-        onAuthStateChanged,
-        signOut,
-      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-      import {
-        getFirestore,
-        doc,
-        onSnapshot,
-      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyAhHtBQUGzYS5sOSh4thghEeGimj9JN5cI",
@@ -366,42 +311,42 @@
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-      // --- CLOAKER LOGIC ---
-      const urlInput = document.getElementById("url-input");
-      const searchBtn = document.getElementById("search-btn");
+      // --- CLOAK LOGIC ---
+      const input = document.getElementById('url-input');
+      const btn = document.getElementById('launch-btn');
 
-      function openInAboutBlank() {
-        let url = urlInput.value.trim();
+      function launchLink() {
+        let url = input.value.trim();
         if (!url) return;
-
-        // Simple protocol check
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          url = 'https://' + url;
+        
+        // Add https if missing
+        if (!/^https?:\/\//i.test(url)) {
+            url = 'https://' + url;
         }
 
         const win = window.open();
-        if (!win) {
-          alert("Pop-up blocked! Please allow pop-ups for this site.");
-          return;
+        if (win) {
+            win.document.body.style.margin = '0';
+            win.document.body.style.height = '100vh';
+            const iframe = win.document.createElement('iframe');
+            iframe.style.border = 'none';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.margin = '0';
+            iframe.src = url;
+            win.document.body.appendChild(iframe);
+            input.value = "";
+        } else {
+            alert("Please allow popups to use the cloaker.");
         }
-        
-        win.document.body.style.margin = '0';
-        win.document.body.style.height = '100vh';
-        const iframe = win.document.createElement('iframe');
-        iframe.style.border = 'none';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.margin = '0';
-        iframe.src = url;
-        win.document.body.appendChild(iframe);
       }
 
-      searchBtn.onclick = openInAboutBlank;
-      urlInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") openInAboutBlank();
+      btn.onclick = launchLink;
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') launchLink();
       });
 
-      // --- SIDEBAR TOGGLES ---
+      // --- SIDEBAR & NAV (Original Logic) ---
       const menuBtn = document.getElementById("menu-toggle");
       const closeBtn = document.getElementById("close-sidebar");
       const sidebar = document.getElementById("sidebar");
@@ -415,58 +360,36 @@
         sidebar.classList.remove("mobile-active");
       };
 
-      // --- DYNAMIC TABS LOGIC ---
-      function handleTabClick(el, url) {
-        document
-          .querySelectorAll(".nav-item")
-          .forEach((i) => i.classList.remove("active"));
-        el.classList.add("active");
-        el.classList.add("loading");
-        setTimeout(() => {
-          window.location.href = "/" + url;
-        }, 400);
-      }
-
       async function loadTabs() {
         const container = document.getElementById("nav-links-container");
-        const currentPage = window.location.pathname.split("/").pop();
-
         try {
           const res = await fetch("/tabs.txt");
           const text = await res.text();
           const blocks = text.trim().split(/\n\s*\n/);
-
           blocks.forEach((block) => {
-            let title = "",
-              url = "";
+            let title = "", url = "";
             block.split("\n").forEach((line) => {
               if (line.includes("Title =")) title = line.split("=")[1].trim();
               if (line.includes("URL =")) url = line.split("=")[1].trim();
             });
-
             if (title && url) {
               const div = document.createElement("div");
               div.className = "nav-item";
               div.innerText = title;
-              if (url === currentPage) div.classList.add("active");
-
-              div.onclick = () => handleTabClick(div, url);
+              div.onclick = () => window.location.href = "/" + url;
               container.appendChild(div);
             }
           });
-        } catch (e) {
-          console.error("Error loading tabs:", e);
-        }
+        } catch (e) { console.error(e); }
       }
       loadTabs();
 
-      // --- FIREBASE AUTH ---
+      // --- AUTH & PFP (Original Logic) ---
       onAuthStateChanged(auth, (user) => {
         if (user && user.emailVerified) {
           const name = user.displayName || user.email.split("@")[0];
           document.getElementById("panel-username").innerText = name;
           document.getElementById("panel-email").innerText = user.email;
-
           onSnapshot(doc(db, "pfps", user.uid), (snap) => {
             const pfpBtn = document.getElementById("pfp-btn");
             if (snap.exists() && snap.data().base64) {
@@ -475,7 +398,6 @@
             } else {
               pfpBtn.innerText = name.charAt(0).toUpperCase();
               pfpBtn.style.backgroundColor = "#7d5fff";
-              pfpBtn.style.backgroundImage = "none";
             }
           });
         } else {
@@ -483,16 +405,13 @@
         }
       });
 
-      // --- PROFILE PANEL TOGGLE ---
       document.getElementById("pfp-btn").onclick = (e) => {
         e.stopPropagation();
         document.getElementById("profile-panel").classList.toggle("active");
       };
-      window.onclick = () =>
-        document.getElementById("profile-panel").classList.remove("active");
+      window.onclick = () => document.getElementById("profile-panel").classList.remove("active");
 
-      const logout = () =>
-        signOut(auth).then(() => (window.location.href = "/index.html"));
+      const logout = () => signOut(auth).then(() => (window.location.href = "/index.html"));
       document.getElementById("logout-trigger").onclick = logout;
       document.getElementById("sidebar-logout").onclick = logout;
     </script>
